@@ -5,16 +5,17 @@ add_definitions(-DUNICODE -D_UNICODE)
 project ("cracken" C)
 
 add_executable (cracken WIN32 "main.c" "cracken.manifest"
-	"mainwindow.c" "mainwindow.h"
 	"app.c" "app.h"
-	"window.c" "window.h"
-	"hiddevice.c" "hiddevice.h"
-	"list.c" "list.h"
+	"curve.c" "curve.h"
 	"deviceenumerator.c" "deviceenumerator.h"
+	"hiddevice.c" "hiddevice.h"
 	"kraken.c" "kraken.h"
-	"xalloc.c" "xalloc.h"
 	"krakenwidget.c" "krakenwidget.h"
 	"layout.c" "layout.h"
+	"list.c" "list.h"
+	"mainwindow.c" "mainwindow.h"
+	"window.c" "window.h"
+	"xalloc.c" "xalloc.h"
 )
 set_property(TARGET cracken PROPERTY C_STANDARD 11)
 

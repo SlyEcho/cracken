@@ -4,6 +4,7 @@
 #include <wchar.h>
 
 #include "app.h"
+#include "curve.h"
 #include "krakenwidget.h"
 #include "layout.h"
 #include "xalloc.h"
@@ -114,19 +115,23 @@ static void created(self) {
 	load_assets(this);
 }
 
-static int control_values[] = { 25, 50, 75, 100 };
-
 static int selected(self, int command) {
 
 	if (command == ID_PUMP) {
 		int i = ComboBox_GetCurSel(private.pump);
-		Kraken_pumpspeed(public.kraken, control_values[i]);
+		if (i != CB_ERR) {
+			Curve *c = Curve_pump_presets[i];
+			Kraken_set_pump_curve(public.kraken, c);
+		}
 		return 0;
 	}
 
 	if (command == ID_FAN) {
 		int i = ComboBox_GetCurSel(private.fan);
-		Kraken_fanspeed(public.kraken, control_values[i]);
+		if (i != CB_ERR) {
+			Curve *c = Curve_fan_presets[i];
+			Kraken_set_fan_curve(public.kraken, c);
+		}
 		return 0;
 	}
 
@@ -162,17 +167,11 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 		0, WC_COMBOBOX, L"asdf", CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,
 		0, 0, 0, 0, base.hwnd, (HMENU) ID_FAN, App_instance, NULL);
 
-#define lengthof(x) (sizeof(x)/sizeof(x[0]))
-
-	HWND boxes[] = { private.pump, private.fan };
-	wchar_t buf[15];
-
-	for (int i = 0; i < lengthof(boxes); i++) {
-		for (int j = 0; j < lengthof(control_values); j++) {
-			swprintf(buf, lengthof(buf), L"%d%%", control_values[j]);
-			ComboBox_AddString(boxes[i], buf);
-		}
-	}
+	for (int i = 0; Curve_pump_presets[i]; i++)
+		ComboBox_AddString(private.pump, Curve_pump_presets[i]->name);
+	
+	for (int i = 0; Curve_fan_presets[i]; i++)
+		ComboBox_AddString(private.fan, Curve_fan_presets[i]->name);
 
 	return this;
 }

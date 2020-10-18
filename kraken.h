@@ -1,5 +1,6 @@
 #pragma once
 
+#include "curve.h"
 #include "list.h"
 #include "hiddevice.h"
 
@@ -17,9 +18,8 @@ typedef struct {
 } Kraken;
 
 void Kraken_update(Kraken *k);
-void Kraken_control(Kraken *k, int isSave, enum FanOrPump fanOrpump, int size, BYTE *levels, int interval);
-void Kraken_fanspeed(Kraken *k, int pct);
-void Kraken_pumpspeed(Kraken *k, int pct); 
+void Kraken_set_pump_curve(Kraken *k, Curve *curve);
+void Kraken_set_fan_curve(Kraken *k, Curve *curve);
 void Kraken_delete(Kraken *k);
 
 DEFINE_LIST_TYPE(Kraken)

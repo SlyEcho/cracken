@@ -1,5 +1,6 @@
 #include <Windows.h>
 
+#include "curve.h"
 #include "kraken.h"
 
 typedef struct {
@@ -42,7 +43,7 @@ void Kraken_update(self) {
 	}
 }
 
-void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size, BYTE *levels, int interval) {
+static void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size, BYTE *levels, int interval) {
 
 	if (private.writer == NULL) {
 		private.writer = CreateFile(public.device->path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
@@ -63,18 +64,18 @@ void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size, BYTE *
 
 		WriteFile(private.writer, packet, sizeof(packet), &num, NULL);
 	}
+	FlushFileBuffers(private.writer);
 }
 
-#define clamp(x, mn, mx) ((x) < (mn) ? (mn) : (x) > (mx) ? (mx) : (x))
-void Kraken_fanspeed(self, int pct) {
-	BYTE levels[] = { clamp(pct, 0, 100) };
-	Kraken_control(this, FALSE, FAN, sizeof(levels), levels, 0);
+void Kraken_set_pump_curve(self, Curve *curve) {
+	int interval = (curve->length - 1 == 0) ? (curve->length - 1) : (100 / (curve->length - 1));
+	Kraken_control(this, FALSE, PUMP, curve->length, curve->items, interval);
+}
+void Kraken_set_fan_curve(self, Curve *curve) {
+	int interval = (curve->length - 1 == 0) ? (curve->length - 1) : (100 / (curve->length - 1));
+	Kraken_control(this, FALSE, FAN, curve->length, curve->items, interval);
 }
 
-void Kraken_pumpspeed(self, int pct) {
-	BYTE levels[] = { clamp(pct, 0, 100) };
-	Kraken_control(this, FALSE, PUMP, sizeof(levels), levels, 0);
-}
 
 KrakenList *Kraken_get_krakens() {
 	HidDeviceList *hids = HidDevice_enumerate();
