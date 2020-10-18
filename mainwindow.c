@@ -95,7 +95,7 @@ MainWindow *MainWindow_create() {
 	base.class = &crackenClass;
 	private.widgets = NULL;
 	private.widget_count = 0;
-	Window_init(this, NULL, L"MainWindow");
+	Window_init(this, NULL, L"Cracken");
 	Window_rescale(this, -1, -1, 300, 200);
 	return this;
 }

@@ -115,6 +115,7 @@ static int handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 				public.class->resize(this);
 				return 0;
 			}
+			break;
 		}
 		case WM_COMMAND: {
 			if (HIWORD(wParam) == BN_CLICKED &&
