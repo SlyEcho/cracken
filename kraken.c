@@ -33,9 +33,9 @@ void Kraken_delete(self) {
 }
 
 void Kraken_update(self) {
-	BYTE packet[256];
+	BYTE packet[65];
 	DWORD num;
-	if (ReadFile(private.reader, packet, 64, &num, NULL)) {
+	if (ReadFile(private.reader, packet, 65, &num, NULL)) {
 		public.device_nr = (int) packet[10];
 		public.temp_c = (double) packet[1] + (double) packet[2] * 0.1;
 		public.fan_rpm = (int) packet[3] << 8 | (int) packet[4];
@@ -64,16 +64,16 @@ static void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size,
 
 		WriteFile(private.writer, packet, sizeof(packet), &num, NULL);
 	}
-	FlushFileBuffers(private.writer);
 }
 
 void Kraken_set_pump_curve(self, Curve *curve) {
 	int interval = (curve->length - 1 == 0) ? (curve->length - 1) : (100 / (curve->length - 1));
-	Kraken_control(this, FALSE, PUMP, curve->length, curve->items, interval);
+	Kraken_control(this, curve->length > 1, PUMP, curve->length, curve->items, interval);
 }
+
 void Kraken_set_fan_curve(self, Curve *curve) {
 	int interval = (curve->length - 1 == 0) ? (curve->length - 1) : (100 / (curve->length - 1));
-	Kraken_control(this, FALSE, FAN, curve->length, curve->items, interval);
+	Kraken_control(this, curve->length > 1, FAN, curve->length, curve->items, interval);
 }
 
 
