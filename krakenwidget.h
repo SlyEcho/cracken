@@ -9,3 +9,5 @@ typedef struct {
 } KrakenWidget;
 
 KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken);
+void KrakenWidget_update(KrakenWidget *kw);
+

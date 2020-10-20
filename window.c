@@ -148,6 +148,7 @@ static int handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 static LRESULT CALLBACK Window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	self;
+
 	if (msg == WM_CREATE) {
 		CREATESTRUCT *pCreate = (CREATESTRUCT *) lParam;
 		this = (Window *) pCreate->lpCreateParams;
@@ -184,6 +185,14 @@ static LRESULT CALLBACK Window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 				handled |= true;
 				break;
 			}
+			case WM_CTLCOLORSTATIC: {
+				if (public.class->static_color) {
+					HDC hdc = (HDC) wParam;
+					HWND hwnd = (HWND) lParam;
+					return public.class->static_color(this, hdc, hwnd);
+				}
+				break;
+			}
 		}
 
 		if ((public.class->style & WS_VSCROLL) && handle_vscroll(this, msg, wParam, lParam) == 0) {
@@ -211,6 +220,7 @@ void Window_init(self, Window *parent, wchar_t *title) {
 			.lpszClassName = public.class->name,
 			.style = CS_HREDRAW | CS_VREDRAW,
 			.hCursor = LoadCursor(NULL, IDC_ARROW),
+			.hbrBackground = public.class->background,
 		};
 
 		RegisterClass(&wc);

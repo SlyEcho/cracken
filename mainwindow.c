@@ -28,22 +28,17 @@ static void destroy(self) {
 	PostQuitMessage(0);
 }
 
-static void paint(self) {
-	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(base.hwnd, &ps);
-	HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 255));
-	FillRect(hdc, &ps.rcPaint, hBrush);
-	DeleteObject(hBrush);
-
-	EndPaint(base.hwnd, &ps);
-}
-
 static void update(self) {
-	SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
 	for (int i = 0; i < private.krakens->length; i++) {
 		Kraken *k = private.krakens->data[i];
 		Kraken_update(k);
 	}
+
+	for (int i = 0; i < private.widget_count; i++) {
+		KrakenWidget *kw = private.widgets[i];
+		KrakenWidget_update(kw);
+	}
+
 	InvalidateRect(base.hwnd, NULL, TRUE);
 	UpdateWindow(base.hwnd);
 }
@@ -67,6 +62,7 @@ static void created(self) {
 		private.widgets = xmalloc(sizeof(KrakenWidget *) * private.widget_count);
 		for (size_t i = 0; i < private.widget_count; i++) {
 			private.widgets[i] = KrakenWidget_create(this, private.krakens->data[i]);
+			KrakenWidget_update(private.widgets[i]);
 		}
 	}
 	resize(this);
@@ -82,7 +78,6 @@ static void command(self, int id) {
 static WindowClass crackenClass = {
 	.name = L"MainWindowClass",
 	.style = WS_OVERLAPPEDWINDOW | WS_VSCROLL,
-	.paint = (fn_window) paint,
 	.resize = (fn_window) resize,
 	.destroyed = (fn_window) destroy,
 	.created = (fn_window) created,
@@ -91,6 +86,9 @@ static WindowClass crackenClass = {
 };
 
 MainWindow *MainWindow_create() {
+	if (!crackenClass.registered) {
+		crackenClass.background = GetSysColorBrush(COLOR_WINDOW);
+	}
 	self = xmalloc(sizeof(private_MainWindow));
 	base.class = &crackenClass;
 	private.widgets = NULL;

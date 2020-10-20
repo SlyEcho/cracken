@@ -1,18 +1,19 @@
 #pragma once
 #include <stdbool.h>
 
-typedef void *HANDLE;
-
 typedef void (*fn_window)(struct s_Window *);
 typedef int (*fn_window_command)(struct s_Window *, int id);
+typedef HBRUSH (*fn_window_static_color)(struct s_Window *, HDC hdc, HWND ctrl);
 
 struct s_Window;
 typedef struct s_WindowClass {
 	wchar_t *name;
 	bool registered;
 	int style;
+	HBRUSH background;
 	fn_window created;
 	fn_window paint;
+	fn_window_static_color static_color;
 	fn_window destroyed;
 	fn_window resize;
 	fn_window_command command;
@@ -23,7 +24,7 @@ typedef struct s_WindowClass {
 
 typedef struct s_Window {
 	WindowClass *class;
-	HANDLE hwnd;
+	HWND hwnd;
 	int width;
 	int height;
 	int dpi;
