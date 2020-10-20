@@ -16,9 +16,6 @@ typedef struct {
 	HFONT big_font;
 	HWND pump;
 	HWND fan;
-	int pump_y;
-	int fan_y;
-	int val_w;
 
 	struct {
 		HWND device;
@@ -83,13 +80,12 @@ static void position(self) {
 	HDC hdc = GetDC(base.hwnd);
 	Layout(hdc, 0, 0, 4, 2, cells, Window_scale(this, 5));
 
-	bool reposition = private.pump_y == 0;
-	private.pump_y = c_val_Pump.y + c_val_Pump.ascender;
-	private.fan_y = c_val_Fan.y + c_val_Fan.ascender;
-	private.val_w = max(max(c_val_Pump.x + c_val_Pump.width, c_val_Fan.x + c_val_Fan.width), c_val_Temp.x + c_val_Temp.width);
+	int pump_y = c_val_Pump.y + c_val_Pump.ascender;
+	int fan_y = c_val_Fan.y + c_val_Fan.ascender;
+	int val_w = max(max(c_val_Pump.x + c_val_Pump.width, c_val_Fan.x + c_val_Fan.width), c_val_Temp.x + c_val_Temp.width);
 
-	MoveWindow(private.pump, private.val_w + m, private.pump_y - h, base.width - private.val_w - m, h, TRUE);
-	MoveWindow(private.fan, private.val_w + m, private.fan_y - h, base.width - private.val_w - m, h, TRUE);
+	MoveWindow(private.pump, val_w + m, pump_y - h, base.width - val_w - m, h, TRUE);
+	MoveWindow(private.fan, val_w + m, fan_y - h, base.width - val_w - m, h, TRUE);
 }
 
 static void load_assets(self) {
@@ -185,9 +181,6 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 	private.font = NULL;
 	private.bold_font = NULL;
 	private.big_font = NULL;
-	private.pump_y = 0;
-	private.fan_y = 0;
-	private.val_w = 0;
 	public.kraken = kraken;
 
 	Window_init(this, parent, L"");
