@@ -4,20 +4,29 @@ add_definitions(-DUNICODE -D_UNICODE)
 
 project ("cracken" C)
 
-add_executable (cracken WIN32 "main.c" "cracken.manifest"
-	"app.c" "app.h"
-	"curve.c" "curve.h"
-	"deviceenumerator.c" "deviceenumerator.h"
-	"hiddevice.c" "hiddevice.h"
-	"kraken.c" "kraken.h"
-	"krakenwidget.c" "krakenwidget.h"
-	"layout.c" "layout.h"
-	"list.c" "list.h"
-	"mainwindow.c" "mainwindow.h"
-	"window.c" "window.h"
-	"xalloc.c" "xalloc.h"
+add_compile_options(-Wno-unused-parameter)
+
+add_executable (cracken WIN32
+	"app.c"
+	"curve.c"
+	"deviceenumerator.c"
+	"hiddevice.c"
+	"kraken.c"
+	"krakenwidget.c"
+	"layout.c"
+	"list.c"
+	"main.c"
+	"mainwindow.c"
+	"window.c"
+	"xalloc.c"
 )
 set_property(TARGET cracken PROPERTY C_STANDARD 11)
 
-target_link_libraries(cracken setupapi.lib hid.lib comctl32.lib)
+target_link_libraries(cracken setupapi hid comctl32 gdi32)
 
+add_custom_command(
+    TARGET cracken
+    POST_BUILD
+    COMMAND "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}\\cracken.manifest\" -outputresource:"${CMAKE_BINARY_DIR}\\cracken.exe"\;\#1
+    COMMENT "Adding manifest..."
+)

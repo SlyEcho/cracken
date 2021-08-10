@@ -20,6 +20,7 @@ typedef struct {
 
 #define base (this->base)
 #define self MainWindow *this
+#define wnd ((Window*)this)
 #define private (*((private_MainWindow*)(this)))
 
 #define ID_UPDATE 0x100
@@ -45,10 +46,10 @@ static void update(self) {
 
 static void resize(self) {
 	for (size_t i = 0; i < private.widget_count; i++) {
-		KrakenWidget *w = private.widgets[i];
-		Window_rescale(w, 10, 10 + i * 150, Window_unscale(this, base.width) - 20, 140);
+		Window *wgt = (Window*)private.widgets[i];
+		Window_rescale(wgt, 10, 10 + i * 150, Window_unscale(wnd, base.width) - 20, 140);
 	}
-	base.content_height = Window_scale(this, 90 * private.widget_count);
+	base.content_height = Window_scale(wnd, 90 * private.widget_count);
 }
 
 static void created(self) {
@@ -61,12 +62,12 @@ static void created(self) {
 	if (private.widget_count > 0) {
 		private.widgets = xmalloc(sizeof(KrakenWidget *) * private.widget_count);
 		for (size_t i = 0; i < private.widget_count; i++) {
-			private.widgets[i] = KrakenWidget_create(this, private.krakens->data[i]);
+			private.widgets[i] = KrakenWidget_create(wnd, private.krakens->data[i]);
 			KrakenWidget_update(private.widgets[i]);
 		}
 	}
 	resize(this);
-	Window_update_scroll(this);
+	Window_update_scroll(wnd);
 }
 
 static void command(self, int id) {
@@ -93,7 +94,7 @@ MainWindow *MainWindow_create() {
 	base.class = &crackenClass;
 	private.widgets = NULL;
 	private.widget_count = 0;
-	Window_init(this, NULL, L"Cracken");
-	Window_rescale(this, -1, -1, 300, 200);
+	Window_init(wnd, NULL, L"Cracken");
+	Window_rescale(wnd, -1, -1, 300, 200);
 	return this;
 }

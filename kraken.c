@@ -43,7 +43,7 @@ void Kraken_update(self) {
 	}
 }
 
-static void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size, BYTE *levels, int interval) {
+static void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size, const BYTE *levels, int interval) {
 
 	if (private.writer == NULL) {
 		private.writer = CreateFile(public.device->path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
@@ -66,12 +66,12 @@ static void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size,
 	}
 }
 
-void Kraken_set_pump_curve(self, Curve *curve) {
+void Kraken_set_pump_curve(self, const Curve *curve) {
 	int interval = (curve->length - 1 == 0) ? (curve->length - 1) : (100 / (curve->length - 1));
 	Kraken_control(this, curve->length > 1, PUMP, curve->length, curve->items, interval);
 }
 
-void Kraken_set_fan_curve(self, Curve *curve) {
+void Kraken_set_fan_curve(self, const Curve *curve) {
 	int interval = (curve->length - 1 == 0) ? (curve->length - 1) : (100 / (curve->length - 1));
 	Kraken_control(this, curve->length > 1, FAN, curve->length, curve->items, interval);
 }

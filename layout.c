@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <windowsx.h>
+#include <wchar.h>
 
 #include "layout.h"
 #include "xalloc.h"
@@ -9,9 +10,9 @@ void Layout(HDC hdc, int left, int top, int nrow, int ncol, LayoutCell **cells, 
 	SIZE size;
 	TEXTMETRIC metrics;
 	wchar_t title_buffer[200];
-	int *rowsizes = xmalloc(sizeof(int) * nrow);
-	int *baselines = xmalloc(sizeof(int) * nrow);
-	int *colsizes = xmalloc(sizeof(int) * ncol);
+	int rowsizes[nrow];
+	int baselines[nrow];
+	int colsizes[ncol];
 
 	for (int i = 0; i < nrow; i++) {
 		rowsizes[i] = 0;
@@ -72,8 +73,4 @@ void Layout(HDC hdc, int left, int top, int nrow, int ncol, LayoutCell **cells, 
 		}
 		y += h + margin;
 	}
-
-	xfree(rowsizes);
-	xfree(baselines);
-	xfree(colsizes);
 }

@@ -33,6 +33,7 @@ typedef struct {
 } private_KrakenWidget;
 
 #define self KrakenWidget *this
+#define wnd ((Window*)this)
 #define base (this->base)
 #define public (*this)
 #define private (*((private_KrakenWidget*)this))
@@ -57,8 +58,8 @@ void KrakenWidget_update(self) {
 
 static void position(self) {
 
-	int m = Window_scale(this, 5);
-	int h = Window_scale(this, 20);
+	int m = Window_scale(wnd, 5);
+	int h = Window_scale(wnd, 20);
 
 	LayoutCell c_lab_Device = { .control = private.labels.device };
 	LayoutCell c_lab_Temp =   { .control = private.labels.temp };
@@ -78,7 +79,7 @@ static void position(self) {
 	};
 	
 	HDC hdc = GetDC(base.hwnd);
-	Layout(hdc, 0, 0, 4, 2, cells, Window_scale(this, 5));
+	Layout(hdc, 0, 0, 4, 2, cells, Window_scale(wnd, 5));
 
 	int pump_y = c_val_Pump.y + c_val_Pump.ascender;
 	int fan_y = c_val_Fan.y + c_val_Fan.ascender;
@@ -94,13 +95,13 @@ static void load_assets(self) {
 	if (private.big_font) DeleteObject(private.big_font);
 
 	private.font = CreateFont(
-		Window_scale(this, 16), 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
+		Window_scale(wnd, 16), 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
 
 	private.bold_font = CreateFont(
-		Window_scale(this, 16), 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
+		Window_scale(wnd, 16), 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
 
 	private.big_font = CreateFont(
-		Window_scale(this, 36), 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Arial");
+		Window_scale(wnd, 36), 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Arial");
 
 	SetWindowFont(private.pump, private.font, FALSE);
 	SetWindowFont(private.fan, private.font, FALSE);
@@ -147,7 +148,7 @@ static int selected(self, int command) {
 		int i = ComboBox_GetCurSel(private.pump);
 		if (i != CB_ERR) {
 			SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
-			Curve *c = Curve_pump_presets[i];
+			const Curve *c = Curve_pump_presets[i];
 			Kraken_set_pump_curve(public.kraken, c);
 		}
 		return 0;
@@ -157,7 +158,7 @@ static int selected(self, int command) {
 		int i = ComboBox_GetCurSel(private.fan);
 		if (i != CB_ERR) {
 			SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
-			Curve *c = Curve_fan_presets[i];
+			const Curve *c = Curve_fan_presets[i];
 			Kraken_set_fan_curve(public.kraken, c);
 		}
 		return 0;
@@ -183,20 +184,25 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 	private.big_font = NULL;
 	public.kraken = kraken;
 
-	Window_init(this, parent, L"");
+	Window_init(wnd, parent, L"");
 
 	#define MAKE_DROPDOWN(id) CreateWindowEx( \
 		0, WC_COMBOBOX, L"", CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE, \
-		0, 0, 0, 0, base.hwnd, (HMENU) id, App_instance, NULL)
+		0, 0, 0, 1000, base.hwnd, (HMENU) id, App_instance, NULL)
 
-	private.pump = MAKE_DROPDOWN(ID_PUMP);	
+	private.pump = MAKE_DROPDOWN(ID_PUMP);
 	private.fan = MAKE_DROPDOWN(ID_FAN);
-
-	for (int i = 0; Curve_pump_presets[i]; i++)
-		ComboBox_AddString(private.pump, Curve_pump_presets[i]->name);
-	
-	for (int i = 0; Curve_fan_presets[i]; i++)
-		ComboBox_AddString(private.fan, Curve_fan_presets[i]->name);
+    
+    wchar_t buf[128] = {0};
+	for (int i = 0; Curve_pump_presets[i]; i++) {
+        wcscpy_s(buf, 128, Curve_pump_presets[i]->name);
+		ComboBox_AddString(private.pump, buf);
+    }
+    
+	for (int i = 0; Curve_fan_presets[i]; i++) {
+        wcscpy_s(buf, 128, Curve_fan_presets[i]->name);
+		ComboBox_AddString(private.fan, buf);
+    }
 
 	#define MAKE_STATIC(text, s) CreateWindowEx( \
 		0, WC_STATIC, text, s | WS_CHILD | WS_VISIBLE /*| SS_SUNKEN*/, \
@@ -212,7 +218,6 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 	private.values.device = MAKE_STATIC(kraken->device->serial, SS_LEFT);
 	private.values.temp = MAKE_STATIC(L"", SS_LEFT);
 
-	
-
 	return this;
 }
+

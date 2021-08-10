@@ -1,7 +1,7 @@
 #include "curve.h"
 
 #define SC(x) static const Curve static_##x = { \
-	.name = L"Fixed " L#x L"%", \
+	.name = L"Fixed " #x L"%", \
 	.length = 1, \
 	.items = { (x) } \
 }
@@ -36,22 +36,22 @@ static const Curve preset_pump_performance = {
 	.items = { 70, 70, 70, 70, 70, 70, 70, 70, 80, 85, 90, 95, 100, 100, 100, 100, 100, 100, 100, 100, 100 },
 };
 
-const Curve *Curve_fan_presets[] = {
+const Curve * const Curve_fan_presets[] = {
 	&preset_fan_silent,
 	&preset_fan_performance,
 	pSC(25),
 	pSC(50),
 	pSC(75),
 	pSC(100),
-	NULL,
+	0,
 };
 
-const Curve *Curve_pump_presets[] = {
+const Curve * const Curve_pump_presets[] = {
 	&preset_pump_silent,
 	&preset_pump_performance,
 	pSC(25),
 	pSC(50),
 	pSC(75),
 	pSC(100),
-	NULL,
+	0,
 };

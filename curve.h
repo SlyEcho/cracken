@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <wchar.h>
 
 typedef struct {
 	wchar_t *name;
@@ -8,5 +9,5 @@ typedef struct {
 	uint8_t items[];
 } Curve;
 
-extern const Curve *Curve_fan_presets[];
-extern const Curve *Curve_pump_presets[];
+extern const Curve * const Curve_fan_presets[];
+extern const Curve * const Curve_pump_presets[];

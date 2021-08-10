@@ -85,6 +85,10 @@ static int handle_vscroll(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return 1;
 }
 
+#ifndef WM_DPICHANGED_BEFOREPARENT
+#define WM_DPICHANGED_BEFOREPARENT 0x02e2
+#endif
+
 static int handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_CREATE: {
@@ -189,7 +193,7 @@ static LRESULT CALLBACK Window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 				if (public.class->static_color) {
 					HDC hdc = (HDC) wParam;
 					HWND hwnd = (HWND) lParam;
-					return public.class->static_color(this, hdc, hwnd);
+					return (LRESULT)public.class->static_color(this, hdc, hwnd);
 				}
 				break;
 			}

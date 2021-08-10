@@ -18,8 +18,8 @@ typedef struct {
 } Kraken;
 
 void Kraken_update(Kraken *k);
-void Kraken_set_pump_curve(Kraken *k, Curve *curve);
-void Kraken_set_fan_curve(Kraken *k, Curve *curve);
+void Kraken_set_pump_curve(Kraken *k, const Curve *curve);
+void Kraken_set_fan_curve(Kraken *k, const Curve *curve);
 void Kraken_delete(Kraken *k);
 
 DEFINE_LIST_TYPE(Kraken)
