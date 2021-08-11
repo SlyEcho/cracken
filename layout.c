@@ -29,7 +29,7 @@ void Layout(HDC hdc, int left, int top, int nrow, int ncol, LayoutCell **cells, 
 				GetWindowText(cell->control, title_buffer, 200);
 				text = title_buffer;
 			}
-			len = (int) wcslen(text);
+			len = text ? (int) wcslen(text) : 0;
 			GetTextExtentPoint32(hdc, text, len, &size);
 			GetTextMetrics(hdc, &metrics);
 			cell->width = size.cx;

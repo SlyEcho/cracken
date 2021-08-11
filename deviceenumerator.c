@@ -48,7 +48,7 @@ HidDevice *DeviceEnumerator_get_device(self) {
 	DWORD detailDataSize = 0;
 	SetupDiGetDeviceInterfaceDetail(private.handle, private.interfaceData, NULL, 0, &detailDataSize, NULL);
 
-	detailData = _alloca(detailDataSize);
+	detailData = alloca(detailDataSize);
 	memset(detailData, 0, detailDataSize);
 	detailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 

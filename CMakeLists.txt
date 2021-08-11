@@ -24,9 +24,9 @@ set_property(TARGET cracken PROPERTY C_STANDARD 11)
 
 target_link_libraries(cracken setupapi hid comctl32 gdi32)
 
-add_custom_command(
-    TARGET cracken
-    POST_BUILD
-    COMMAND "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}\\cracken.manifest\" -outputresource:"${CMAKE_BINARY_DIR}\\cracken.exe"\;\#1
-    COMMENT "Adding manifest..."
-)
+#add_custom_command(
+#    TARGET cracken
+#    POST_BUILD
+#    COMMAND "mt.exe" -manifest \"${CMAKE_SOURCE_DIR}\\cracken.manifest\" -outputresource:"${CMAKE_BINARY_DIR}\\cracken.exe"\;\#1
+#    COMMENT "Adding manifest..."
+#)

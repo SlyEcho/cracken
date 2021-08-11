@@ -193,15 +193,12 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 	private.pump = MAKE_DROPDOWN(ID_PUMP);
 	private.fan = MAKE_DROPDOWN(ID_FAN);
     
-    wchar_t buf[128] = {0};
 	for (int i = 0; Curve_pump_presets[i]; i++) {
-        wcscpy_s(buf, 128, Curve_pump_presets[i]->name);
-		ComboBox_AddString(private.pump, buf);
+		ComboBox_AddString(private.pump, Curve_pump_presets[i]->name);
     }
     
 	for (int i = 0; Curve_fan_presets[i]; i++) {
-        wcscpy_s(buf, 128, Curve_fan_presets[i]->name);
-		ComboBox_AddString(private.fan, buf);
+		ComboBox_AddString(private.fan, Curve_fan_presets[i]->name);
     }
 
 	#define MAKE_STATIC(text, s) CreateWindowEx( \

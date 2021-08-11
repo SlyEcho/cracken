@@ -3,6 +3,17 @@
 #include "app.h"
 #include "window.h"
 
+#ifndef WM_DPICHANGED
+#define WM_DPICHANGED 0x02e0
+#endif
+
+#ifndef WM_DPICHANGED_BEFOREPARENT
+#define WM_DPICHANGED_BEFOREPARENT 0x02e2
+#endif
+
+WINUSERAPI UINT WINAPI GetDpiForWindow(_In_ HWND hwnd);
+WINUSERAPI UINT WINAPI GetDpiForSystem(VOID);
+
 #define self Window *this
 #define public (*this)
 
@@ -84,10 +95,6 @@ static int handle_vscroll(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 	return 1;
 }
-
-#ifndef WM_DPICHANGED_BEFOREPARENT
-#define WM_DPICHANGED_BEFOREPARENT 0x02e2
-#endif
 
 static int handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
