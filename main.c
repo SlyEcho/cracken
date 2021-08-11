@@ -1,5 +1,5 @@
 #include <windows.h>
-#include <CommCtrl.h>
+#include <commctrl.h>
 
 #include "app.h"
 #include "mainwindow.h"

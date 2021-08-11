@@ -1,4 +1,4 @@
 #pragma once
-#include <Windows.h>
+#include <windows.h>
 
 extern HINSTANCE App_instance;

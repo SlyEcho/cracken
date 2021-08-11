@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include <windows.h>
 
 #include "app.h"
 #include "window.h"

@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include <windows.h>
 
 #include "curve.h"
 #include "kraken.h"

@@ -1,6 +1,6 @@
-#include <Windows.h>
+#include <windows.h>
 #include <windowsx.h>
-#include <CommCtrl.h>
+#include <commctrl.h>
 #include <wchar.h>
 
 #include "app.h"
