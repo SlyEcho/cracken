@@ -6,10 +6,10 @@
 #include "xalloc.h"
 
 HidDevice *HidDevice_create(int vid, int pid, wchar_t *path) {
-	size_t len = wcslen(path) + 1;
-	HidDevice *d = xmalloc(sizeof(HidDevice) + len * sizeof(wchar_t));
-	memcpy(d->path, path, sizeof(wchar_t) * (len + 1));
-	d->path[len - 1] = 0;
+	size_t len = wcslen(path);
+	HidDevice *d = xmalloc(sizeof(HidDevice) + (len + 1) * sizeof(wchar_t));
+	memcpy(d->path, path, sizeof(wchar_t) * len);
+	d->path[len] = 0;
 	d->vendor_id = vid;
 	d->product_id = pid;
 	d->serial[0] = 0;
@@ -17,7 +17,7 @@ HidDevice *HidDevice_create(int vid, int pid, wchar_t *path) {
 }
 
 void HidDevice_delete(HidDevice *h) {
-	xfree(h);
+    xfree(h);
 }
 
 HidDeviceList *HidDevice_enumerate() {
@@ -32,6 +32,5 @@ HidDeviceList *HidDevice_enumerate() {
 	}
 
 	DeviceEnumerator_delete(de);
-
 	return list;
 }

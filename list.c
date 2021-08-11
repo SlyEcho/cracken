@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <string.h>
 
 #include "list.h"
@@ -20,8 +19,8 @@ void List_delete(List *b, fn_delete deleter) {
 					deleter(b->data[i]);
 			}
 		}
-		free(b->data);
-		free(b);
+		xfree(b->data);
+		xfree(b);
 	}
 }
 

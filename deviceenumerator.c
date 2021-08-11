@@ -33,7 +33,7 @@ DeviceEnumerator *DeviceEnumerator_create() {
 
 void DeviceEnumerator_delete(self) {
 	SetupDiDestroyDeviceInfoList(private.handle);
-	free(private.interfaceData);
+	xfree(private.interfaceData);
 }
 
 bool DeviceEnumerator_move_next(self) {
@@ -48,7 +48,7 @@ HidDevice *DeviceEnumerator_get_device(self) {
 	DWORD detailDataSize = 0;
 	SetupDiGetDeviceInterfaceDetail(private.handle, private.interfaceData, NULL, 0, &detailDataSize, NULL);
 
-	detailData = xmalloc(detailDataSize);
+	detailData = _alloca(detailDataSize);
 	memset(detailData, 0, detailDataSize);
 	detailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 
@@ -71,8 +71,6 @@ HidDevice *DeviceEnumerator_get_device(self) {
 		d->serial[0] = 0;
 
 exit:
-	if (detailData)
-		free(detailData);
 	if (file)
 		CloseHandle(file);
 

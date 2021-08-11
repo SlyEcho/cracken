@@ -2,6 +2,7 @@
 
 #include "curve.h"
 #include "kraken.h"
+#include "xalloc.h"
 
 typedef struct {
 	Kraken public;
@@ -14,8 +15,7 @@ typedef struct {
 #define private (*((private_Kraken*)this))
 
 Kraken *Kraken_create(HidDevice *device) {
-	self = malloc(sizeof(private_Kraken));
-	if (!this) return NULL;
+	self = xmalloc(sizeof(private_Kraken));
 
 	public.device = device;
 	private.reader = CreateFile(device->path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
@@ -29,7 +29,7 @@ void Kraken_delete(self) {
 		CloseHandle(private.writer);
 	}
 	HidDevice_delete(public.device);
-	free(this);
+	xfree(this);
 }
 
 void Kraken_update(self) {
@@ -76,7 +76,6 @@ void Kraken_set_fan_curve(self, const Curve *curve) {
 	Kraken_control(this, curve->length > 1, FAN, curve->length, curve->items, interval);
 }
 
-
 KrakenList *Kraken_get_krakens() {
 	HidDeviceList *hids = HidDevice_enumerate();
 	KrakenList *krakens = KrakenList_create(1);
@@ -86,11 +85,11 @@ KrakenList *Kraken_get_krakens() {
 		if (hid->vendor_id == 0x1e71 && hid->product_id == 0x170e) {
 			self = Kraken_create(hid);
 			KrakenList_append(krakens, this);
-			hids->data[i] = NULL;
+            hids->data[i] = NULL;
 		}
 	}
 
 	HidDeviceList_delete(hids);
-
+    
 	return krakens;
 }
