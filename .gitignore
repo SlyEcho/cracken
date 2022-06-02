@@ -1,3 +1,5 @@
 .vs/
 .kdev4/
 build*/
+zig-cache/
+zig-out/
