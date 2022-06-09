@@ -1,4 +1,6 @@
 ﻿#include <windows.h>
+#include <windowsx.h>
+#include <commctrl.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -13,6 +15,7 @@ typedef struct {
 	MainWindow public;
 	HFONT font;
 	HWND button;
+	HWND no_devices;
 	KrakenList *krakens;
 	KrakenWidget **widgets;
 	size_t widget_count;
@@ -50,6 +53,14 @@ static void resize(self) {
 		Window_rescale(wgt, 10, 10 + i * 150, Window_unscale(wnd, base.width) - 20, 140);
 	}
 	base.content_height = Window_scale(wnd, 90 * private.widget_count);
+
+	if (private.no_devices) {
+		MoveWindow(private.no_devices, 0, 0, base.width, base.height, true);
+		if (private.font) DeleteObject(private.font);
+		private.font = CreateFont(
+			Window_scale(wnd, 16), 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
+		SetWindowFont(private.no_devices, private.font, true);
+	}
 }
 
 static void created(self) {
@@ -66,6 +77,13 @@ static void created(self) {
 			KrakenWidget_update(private.widgets[i]);
 		}
 	}
+
+	if (private.widget_count == 0) {
+		private.no_devices = CreateWindowEx(
+			0, WC_STATIC, L"No devices found", SS_CENTER | SS_CENTERIMAGE | WS_CHILD | WS_VISIBLE,
+			0, 0, 0, 0, base.hwnd, (HMENU) NULL, App_instance, NULL);
+	}
+	
 	resize(this);
 	Window_update_scroll(wnd);
 }
