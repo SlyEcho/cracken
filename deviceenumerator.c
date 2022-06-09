@@ -47,8 +47,7 @@ HidDevice *DeviceEnumerator_get_device(self) {
 	DWORD detailDataSize = 0;
 	SetupDiGetDeviceInterfaceDetail(private.handle, private.interfaceData, NULL, 0, &detailDataSize, NULL);
 
-	detailData = alloca(detailDataSize);
-	memset(detailData, 0, detailDataSize);
+	detailData = xcalloc(1, detailDataSize);
 	detailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
 
 	if (!SetupDiGetDeviceInterfaceDetail(private.handle, private.interfaceData, detailData, detailDataSize, &detailDataSize, NULL)) {
@@ -72,6 +71,7 @@ HidDevice *DeviceEnumerator_get_device(self) {
 exit:
 	if (file)
 		CloseHandle(file);
+	free(detailData);
 
 	return d;
 }
