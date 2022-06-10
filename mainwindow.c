@@ -48,11 +48,12 @@ static void update(self) {
 }
 
 static void resize(self) {
+	base.content_height = 0;
 	for (size_t i = 0; i < private.widget_count; i++) {
 		Window *wgt = (Window*)private.widgets[i];
 		Window_rescale(wgt, 10, 10 + i * 150, Window_unscale(wnd, base.width) - 20, 140);
+		base.content_height += Window_scale(wnd, 150);
 	}
-	base.content_height = Window_scale(wnd, 90 * private.widget_count);
 
 	if (private.no_devices) {
 		MoveWindow(private.no_devices, 0, 0, base.width, base.height, true);
@@ -94,6 +95,11 @@ static void command(self, int id) {
 	}
 }
 
+static HBRUSH static_color(self, HDC hdc, HWND ctrl) {
+	SetBkMode(hdc, TRANSPARENT);
+	return GetSysColorBrush(COLOR_WINDOW);
+}
+
 static WindowClass crackenClass = {
 	.name = L"MainWindowClass",
 	.style = WS_OVERLAPPEDWINDOW | WS_VSCROLL,
@@ -102,6 +108,7 @@ static WindowClass crackenClass = {
 	.created = (fn_window) created,
 	.clicked = (fn_window_command) command,
 	.timer = (fn_window_command) command,
+	.static_color = (fn_window_static_color) static_color,
 };
 
 MainWindow *MainWindow_create() {

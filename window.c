@@ -43,18 +43,61 @@ void Window_update_scroll(self) {
 	}
 }
 
-static int handle_vscroll(self, UINT msg, WPARAM wParam, LPARAM lParam) {
+static bool handle_resize(self, UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch (msg) {
+		case WM_SIZE: {
+			public.width = LOWORD(lParam);
+			public.height = HIWORD(lParam);
+			return true;
+		}
+		case WM_DPICHANGED_BEFOREPARENT: {
+			public.dpi = GetDpiForWindow(public.hwnd);
+			return true;
+		}
+		case WM_DPICHANGED: {
+			public.dpi = HIWORD(wParam);
+			RECT* r = (RECT*)lParam;
+			SetWindowPos(public.hwnd, NULL,
+				r->left, r->top,
+				r->right - r->left, r->bottom - r->top,
+				SWP_NOZORDER | SWP_NOACTIVATE
+			);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static HBRUSH handle_colors(self, UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch (msg) {
+		case WM_CTLCOLORSTATIC: {
+			if (public.class->static_color) {
+				HDC hdc = (HDC)wParam;
+				HWND hwnd = (HWND)lParam;
+				return public.class->static_color(this, hdc, hwnd);
+			}
+			break;
+		}
+	}
+
+	return NULL;
+}
+
+static bool handle_vscroll(self, UINT msg, WPARAM wParam, LPARAM lParam) {
+	if ((public.class->style & WS_VSCROLL) == 0) return false;
+
 	switch (msg) {
 		case WM_DPICHANGED:
 		case WM_SIZE: {
 			Window_update_scroll(this);
-			return 0;
+			return true;
 		}
 		case WM_MOUSEWHEEL: {
 			int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 			int turn = zDelta / WHEEL_DELTA;
 			SendMessage(public.hwnd, WM_VSCROLL, MAKELONG(turn > 0 ? SB_LINEUP : SB_LINEDOWN, 0), 0);
-			return 0;
+			return true;
 		}
 		case WM_VSCROLL: {
 			SCROLLINFO si = {
@@ -89,33 +132,33 @@ static int handle_vscroll(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 				ScrollWindow(public.hwnd, 0, oldpos - si.nPos, NULL, NULL);
 			}
 
-			return 0;
+			return true;
 		}
 	}
 
-	return 1;
+	return false;
 }
 
-static int handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
+static bool handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_CREATE: {
 			if (public.class->created) {
 				public.class->created(this);
-				return 0;
+				return true;
 			}
 			break;
 		}
 		case WM_DESTROY: {
 			if (public.class->destroyed) {
 				public.class->destroyed(this);
-				return 0;
+				return true;
 			}
 			break;
 		}
 		case WM_PAINT: {
 			if (public.class->paint) {
 				public.class->paint(this);
-				return 0;
+				return true;
 			}
 			break;
 		}
@@ -124,7 +167,7 @@ static int handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 		case WM_SIZE: {
 			if (public.class->resize) {
 				public.class->resize(this);
-				return 0;
+				return true;
 			}
 			break;
 		}
@@ -132,29 +175,29 @@ static int handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 			if (HIWORD(wParam) == BN_CLICKED &&
 				public.class->clicked &&
 				public.class->clicked(this, LOWORD(wParam)) == 0) {
-				return 0;
+				return true;
 			}
 			if (HIWORD(wParam) == CBN_SELCHANGE &&
 				public.class->select &&
 				public.class->select(this, LOWORD(wParam)) == 0) {
-				return 0;
+				return true;
 			}
 			if (public.class->command &&
 				public.class->command(this, LOWORD(wParam)) == 0) {
-				return 0;
+				return true;
 			}
 			break;
 		}
 		case WM_TIMER: {
 			if (public.class->timer &&
 				public.class->timer(this, (int) wParam) == 0) {
-				return 0;
+				return true;
 			}
 			break;
 		}
 	}
 
-	return 1;
+	return false;
 }
 
 static LRESULT CALLBACK Window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
@@ -170,54 +213,19 @@ static LRESULT CALLBACK Window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 	}
 
 	if (this != NULL) {
+		HBRUSH color = handle_colors(this, msg, wParam, lParam);
+		if (color != NULL) {
+			return (HRESULT)color;
+		}
+
 		bool handled = false;
-
-		switch (msg) {
-			case WM_SIZE: {
-				public.width = LOWORD(lParam);
-				public.height = HIWORD(lParam);
-				handled |= true;
-				break;
-			}
-			case WM_DPICHANGED_BEFOREPARENT: {
-				public.dpi = GetDpiForWindow(public.hwnd);
-				handled |= true;
-				break;
-
-			}
-			case WM_DPICHANGED: {
-				public.dpi = HIWORD(wParam);
-				RECT *r = (RECT *) lParam;
-				SetWindowPos(hWnd, NULL,
-					r->left, r->top,
-					r->right - r->left, r->bottom - r->top,
-					SWP_NOZORDER | SWP_NOACTIVATE
-				);
-				handled |= true;
-				break;
-			}
-			case WM_CTLCOLORSTATIC: {
-				if (public.class->static_color) {
-					HDC hdc = (HDC) wParam;
-					HWND hwnd = (HWND) lParam;
-					return (LRESULT)public.class->static_color(this, hdc, hwnd);
-				}
-				break;
-			}
-		}
-
-		if ((public.class->style & WS_VSCROLL) && handle_vscroll(this, msg, wParam, lParam) == 0) {
-			handled |= true;
-		}
-
-		if (handle_virtual(this, msg, wParam, lParam) == 0) {
-			handled |= true;
-		}
+		handled |= handle_resize(this, msg, wParam, lParam);
+		handled |= handle_virtual(this, msg, wParam, lParam);
+		handled |= handle_vscroll(this, msg, wParam, lParam);
 
 		if (handled) {
 			return 0;
 		}
-
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
