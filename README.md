@@ -22,6 +22,7 @@ This is a simple Win32 application to control and monitor the fan and pump in NZ
 - No CPU monitoring
 - No GPU monitoring
 - No .NET framework required
+- No Fahrenheit
 
 ## Requirements
 - Windows
