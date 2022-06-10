@@ -94,9 +94,12 @@ static bool handle_vscroll(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 			return true;
 		}
 		case WM_MOUSEWHEEL: {
+			int scrollLines = 3;
+			SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &scrollLines, 0);
 			int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 			int turn = zDelta / WHEEL_DELTA;
-			SendMessage(public.hwnd, WM_VSCROLL, MAKELONG(turn > 0 ? SB_LINEUP : SB_LINEDOWN, 0), 0);
+			for (int i = 0; i < scrollLines; i++)
+				SendMessage(public.hwnd, WM_VSCROLL, MAKELONG(turn > 0 ? SB_LINEUP : SB_LINEDOWN, 0), 0);
 			return true;
 		}
 		case WM_VSCROLL: {
