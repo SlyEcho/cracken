@@ -218,7 +218,7 @@ static LRESULT CALLBACK Window_proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM l
 	if (this != NULL) {
 		HBRUSH color = handle_colors(this, msg, wParam, lParam);
 		if (color != NULL) {
-			return (HRESULT)color;
+			return (LRESULT)color;
 		}
 
 		bool handled = false;
