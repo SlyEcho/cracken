@@ -71,7 +71,7 @@ HidDevice *DeviceEnumerator_get_device(self) {
 exit:
 	if (file)
 		CloseHandle(file);
-	free(detailData);
+	xfree(detailData);
 
 	return d;
 }

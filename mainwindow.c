@@ -14,7 +14,6 @@
 typedef struct {
 	MainWindow public;
 	HFONT font;
-	HWND button;
 	HWND no_devices;
 	KrakenList *krakens;
 	KrakenWidget **widgets;
