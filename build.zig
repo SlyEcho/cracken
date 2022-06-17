@@ -12,13 +12,14 @@ pub fn build(b: *std.build.Builder) !void {
     exe.setTarget(tgt);
     exe.subsystem = .Windows;
     exe.c_std = .C11;
+    exe.want_lto = true;
 
     if (mode != .Debug) {
         exe.strip = true;
     }
-    
-    const flags = [_][] const u8 { "-DUNICODE" };
-    const sources = [_][] const u8 {
+
+    const flags = [_][]const u8{ "-DUNICODE", "-D_UNICODE", "-DWIN32_LEAN_AND_MEAN" };
+    const sources = [_][]const u8{
         "app.c",
         "curve.c",
         "deviceenumerator.c",
@@ -34,7 +35,7 @@ pub fn build(b: *std.build.Builder) !void {
     };
 
     exe.addCSourceFiles(&sources, &flags);
-    
+
     exe.linkLibC();
     exe.linkSystemLibrary("setupapi");
     exe.linkSystemLibrary("hid");
