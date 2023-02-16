@@ -1,15 +1,17 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) !void {
-    const mode = b.standardReleaseOptions();
+    const mode = b.standardOptimizeOption(.{});
     const tgt = b.standardTargetOptions(.{
         .default_target = try std.zig.CrossTarget.parse(.{
             .arch_os_abi = "x86_64-windows-gnu"
         })
     });
-    const exe = b.addExecutable("cracken", null);
-    exe.setBuildMode(mode);
-    exe.setTarget(tgt);
+    const exe = b.addExecutable(.{
+        .name = "cracken",
+        .target = tgt,
+        .optimize = mode,
+    });
     exe.subsystem = .Windows;
     exe.c_std = .C11;
     exe.want_lto = true;
@@ -18,8 +20,8 @@ pub fn build(b: *std.build.Builder) !void {
         exe.strip = true;
     }
 
-    const flags = [_][]const u8{ "-DUNICODE", "-D_UNICODE", "-DWIN32_LEAN_AND_MEAN" };
-    const sources = [_][]const u8{
+    const flags = .{ "-DUNICODE", "-D_UNICODE", "-DWIN32_LEAN_AND_MEAN" };
+    const sources = .{
         "app.c",
         "curve.c",
         "deviceenumerator.c",
