@@ -4,7 +4,7 @@
 
 #include "layout.h"
 #include "xalloc.h"
-
+/*
 void Layout(HDC hdc, int left, int top, int nrow, int ncol, LayoutCell **cells, int margin) {
 
 	SIZE size;
@@ -74,3 +74,4 @@ void Layout(HDC hdc, int left, int top, int nrow, int ncol, LayoutCell **cells, 
 		y += h + margin;
 	}
 }
+*/
