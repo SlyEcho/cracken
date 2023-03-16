@@ -166,7 +166,13 @@ static bool handle_virtual(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 			break;
 		}
 		case WM_DPICHANGED_BEFOREPARENT:
-		case WM_DPICHANGED:
+		case WM_DPICHANGED: {
+			if (public.class->dpi) {
+				public.class->dpi(this);
+				return true;
+			}
+			break;
+		}
 		case WM_SIZE: {
 			if (public.class->resize) {
 				public.class->resize(this);

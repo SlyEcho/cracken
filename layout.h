@@ -11,4 +11,4 @@ typedef struct {
 	HWND control;
 } LayoutCell;
 
-void Layout(HDC hdc, int left, int top, int nrow, int ncol, LayoutCell **cells, int margin);
+void Layout(HDC hdc, int left, int top, unsigned nrow, unsigned ncol, LayoutCell **cells, int margin);

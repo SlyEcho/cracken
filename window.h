@@ -17,6 +17,7 @@ typedef struct s_WindowClass {
 	fn_window_static_color static_color;
 	fn_window destroyed;
 	fn_window resize;
+	fn_window dpi;
 	fn_window_command command;
 	fn_window_command clicked;
 	fn_window_command select;

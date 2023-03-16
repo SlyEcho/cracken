@@ -89,18 +89,21 @@ static void position(self) {
 	MoveWindow(private.fan, val_w + m, fan_y - h, base.width - val_w - m, h, TRUE);
 }
 
-static void load_assets(self) {
-	if (private.font) DeleteObject(private.font);
-	if (private.bold_font) DeleteObject(private.bold_font);
-	if (private.big_font) DeleteObject(private.big_font);
+static void load_assets(self, bool reload) {
+	if (reload) {
+		if (private.font) DeleteObject(private.font);
+		if (private.bold_font) DeleteObject(private.bold_font);
+		if (private.big_font) DeleteObject(private.big_font);
+		private.font = private.bold_font = private.big_font = NULL;
+	}
 
-	private.font = CreateFont(
+	if (!private.font) private.font = CreateFont(
 		Window_scale(wnd, 16), 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
 
-	private.bold_font = CreateFont(
+	if (!private.bold_font) private.bold_font = CreateFont(
 		Window_scale(wnd, 16), 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
 
-	private.big_font = CreateFont(
+	if (!private.big_font) private.big_font = CreateFont(
 		Window_scale(wnd, 36), 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Arial");
 
 	SetWindowFont(private.pump, private.font, FALSE);
@@ -132,14 +135,17 @@ static HBRUSH static_color(self, HDC hdc, HWND ctrl) {
 	return GetSysColorBrush(COLOR_WINDOW);
 }
 
-
 static void resize(self) {
-	load_assets(this);
+	load_assets(this, false);
 	position(this);
 }
 
 static void created(self) {
-	load_assets(this);
+	load_assets(this, false);
+}
+
+static void dpi(self) {
+	load_assets(this, true);
 }
 
 static int selected(self, int command) {
@@ -172,12 +178,13 @@ static WindowClass class = {
 	.style = WS_CHILD | WS_VISIBLE,
 	.created = (fn_window) created,
 	.resize = (fn_window) resize,
+	.dpi = (fn_window) dpi,
 	.select = (fn_window_command) selected,
 	.static_color = (fn_window_static_color) static_color,
 };
 
 KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
-	self = xmalloc(sizeof(private_KrakenWidget));
+	self = xcalloc(1, sizeof(private_KrakenWidget));
 	base.class = &class;
 	private.font = NULL;
 	private.bold_font = NULL;
