@@ -39,20 +39,9 @@ pub fn build(b: *std.build.Builder) !void {
 
     exe.addCSourceFiles(&sources, &flags);
 
-    //const ziglibs = b.addStaticLibrary(.{
-    //    .name = "ziglibs",
-    //    .root_source_file = .{ .path = "ziglibs.zig" },
-    //    .target = tgt,
-    //    .optimize = mode,
-    //});
-    //ziglibs.addIncludePath(b.build_root.path.?);
-    //exe.linkLibrary(ziglibs);
-
     exe.linkLibC();
     exe.linkSystemLibrary("setupapi");
     exe.linkSystemLibrary("hid");
     exe.linkSystemLibrary("comctl32");
     exe.linkSystemLibrary("gdi32");
-
-    exe.install();
 }
