@@ -44,4 +44,10 @@ pub fn build(b: *std.build.Builder) !void {
     exe.linkSystemLibrary("hid");
     exe.linkSystemLibrary("comctl32");
     exe.linkSystemLibrary("gdi32");
+
+    b.installArtifact(exe);
+
+    const run_exe = b.addRunArtifact(exe);
+    const run_step = b.step("run", "Run cracken");
+    run_step.dependOn(&run_exe.step);
 }

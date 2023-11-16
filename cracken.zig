@@ -77,12 +77,12 @@ extern "user32" fn SendMessageTimeoutW(
 fn GetWindowFont(hwnd: HWND) !HFONT {
     var out: DWORD_PTR = undefined;
     const result = SendMessageTimeoutW(hwnd, win32.user32.WM_GETFONT, 0, 0, 0x0002, 100, &out);
-    std.debug.print("GetWindowFont({x}) result: {x} ~ {x} ~ {x}\n", .{ @ptrToInt(hwnd), out, @intCast(usize, out), @bitCast(usize, out) });
+
     if (result == 0) {
         const lastError = win32.kernel32.GetLastError();
         return win32.unexpectedError(lastError);
     }
-    return @intToPtr(HFONT, @bitCast(usize, out));
+    return @as(HFONT, @ptrFromInt(@as(usize, @bitCast(out))));
 }
 
 pub export fn Layout(
@@ -97,8 +97,6 @@ pub export fn Layout(
     var buffer: [4096]u8 = undefined;
     var fba = std.heap.FixedBufferAllocator.init(&buffer);
     const allocator = fba.allocator();
-
-    std.debug.print("Layout(hdc: {x}, {}, {}, {}, {}, cells: {x}, {})\n", .{ @ptrToInt(hdc), left, top, nrow, ncol, @ptrToInt(cells), margin });
 
     var rowsizes: []c_int = allocator.alloc(c_int, nrow) catch {
         std.debug.print("couldn't allocate {1} rows of {0} row sizes\n", .{ c_int, nrow });
@@ -130,21 +128,21 @@ pub export fn Layout(
 
         for (0..ncol) |j| {
             var cell = cells[i * ncol + j];
-            std.debug.print("processing cell {}, {}, control: {x}\n", .{ i, j, @ptrToInt(cell.control) });
+            std.debug.print("processing cell {}, {}, control: {x}\n", .{ i, j, @intFromPtr(cell.control) });
             if (cell.font == null and cell.control != null) {
                 std.debug.print("getting font\n", .{});
                 cell.font = GetWindowFont(cell.control.?) catch null;
             }
 
             if (cell.font != null) {
-                std.debug.print("selecting font: {x}\n", .{@ptrToInt(cell.font)});
-                _ = SelectObject(hdc, @ptrCast(HGDIOBJ, cell.font.?));
+                std.debug.print("selecting font: {x}\n", .{@intFromPtr(cell.font)});
+                _ = SelectObject(hdc, @as(HGDIOBJ, @ptrCast(cell.font.?)));
 
                 var text: ?PWSTR = cell.text;
                 if (text == null and cell.control != null) {
                     std.debug.print("Getting title\n", .{});
 
-                    _ = GetWindowTextW(cell.control.?, title_buffer, @intCast(c_int, title_buffer.len));
+                    _ = GetWindowTextW(cell.control.?, title_buffer, @as(c_int, @intCast(title_buffer.len)));
                     text = title_buffer;
                 }
                 var len = if (text != null) std.mem.len(text.?) else 0;
@@ -154,7 +152,7 @@ pub export fn Layout(
                 var size: SIZE = undefined;
                 var metrics: TEXTMETRICW = undefined;
 
-                _ = GetTextExtentPoint32W(hdc, text.?, @intCast(c_int, len), &size);
+                _ = GetTextExtentPoint32W(hdc, text.?, @as(c_int, @intCast(len)), &size);
                 _ = GetTextMetricsW(hdc, &metrics);
 
                 cell.width = size.cx;
@@ -228,7 +226,7 @@ extern "kernel32" fn GetModuleHandleW(lpModuleName: ?PCWSTR) callconv(WINAPI) HM
 extern "comctl32" fn InitCommonControls() callconv(WINAPI) void;
 
 pub fn main() !void {
-    App_instance = @ptrCast(HINSTANCE, GetModuleHandleW(null));
+    App_instance = @as(HINSTANCE, @ptrCast(GetModuleHandleW(null)));
     InitCommonControls();
 
     const mw: *Window = MainWindow_create();
