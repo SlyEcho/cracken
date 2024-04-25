@@ -21,7 +21,6 @@ void HidDevice_delete(HidDevice *h) {
 	xfree(h->path);
     xfree(h);
 }
-*/
 
 HidDeviceList *HidDevice_enumerate() {
 	HidDeviceList *list = HidDeviceList_create(10);
@@ -37,3 +36,4 @@ HidDeviceList *HidDevice_enumerate() {
 	DeviceEnumerator_delete(de);
 	return list;
 }
+*/
