@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn build(b: *std.build.Builder) !void {
+pub fn build(b: *std.Build) !void {
     const mode = b.standardOptimizeOption(.{});
     const tgt = b.standardTargetOptions(.{
         .default_target = try std.zig.CrossTarget.parse(.{
@@ -13,12 +13,10 @@ pub fn build(b: *std.build.Builder) !void {
         .target = tgt,
         .optimize = mode,
     });
-    exe.c_std = .C11;
     exe.want_lto = true;
 
     if (mode != .Debug) {
         exe.subsystem = .Windows;
-        exe.strip = true;
     }
 
     const flags = .{ "-DUNICODE", "-D_UNICODE", "-DWIN32_LEAN_AND_MEAN" };
@@ -37,7 +35,7 @@ pub fn build(b: *std.build.Builder) !void {
         "xalloc.c",
     };
 
-    exe.addCSourceFiles(&sources, &flags);
+    exe.addCSourceFiles(.{ .files = &sources, .flags = &flags });
 
     exe.linkLibC();
     exe.linkSystemLibrary("setupapi");
@@ -48,6 +46,7 @@ pub fn build(b: *std.build.Builder) !void {
     b.installArtifact(exe);
 
     const run_exe = b.addRunArtifact(exe);
+    run_exe.step.dependOn(b.getInstallStep());
     const run_step = b.step("run", "Run cracken");
     run_step.dependOn(&run_exe.step);
 }

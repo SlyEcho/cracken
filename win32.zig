@@ -4,7 +4,6 @@ const win32 = std.os.windows;
 pub const WINAPI = win32.WINAPI;
 pub const HINSTANCE = win32.HINSTANCE;
 pub const HMODULE = win32.HMODULE;
-pub const MSG = win32.user32.MSG;
 pub const RECT = win32.RECT;
 pub const HGDIOBJ = *opaque {};
 pub const LRESULT = win32.LRESULT;
@@ -23,6 +22,19 @@ pub const HWND = win32.HWND;
 pub const HDC = win32.HDC;
 pub const TRUE = win32.TRUE;
 pub const FALSE = win32.FALSE;
+pub const POINT = extern struct {
+    x: LONG,
+    y: LONG,
+};
+pub const MSG = extern struct {
+    hwnd: HWND,
+    message: UINT,
+    wParam: WPARAM,
+    lParam: LPARAM,
+    time: DWORD,
+    pt: POINT,
+    lPrivate: DWORD,
+};
 pub const HFONT = *opaque {};
 pub const SIZE = extern struct { cx: LONG, cy: LONG };
 pub const TEXTMETRICW = extern struct {
@@ -68,7 +80,8 @@ pub extern "user32" fn SendMessageTimeoutW(
 
 pub fn GetWindowFont(hwnd: HWND) !HFONT {
     var out: DWORD_PTR = undefined;
-    const result = SendMessageTimeoutW(hwnd, win32.user32.WM_GETFONT, 0, 0, 0x0002, 100, &out);
+    const WM_GETFONT = 0x0031;
+    const result = SendMessageTimeoutW(hwnd, WM_GETFONT, 0, 0, 0x0002, 100, &out);
 
     if (result == 0) {
         const lastError = win32.kernel32.GetLastError();
@@ -77,6 +90,6 @@ pub fn GetWindowFont(hwnd: HWND) !HFONT {
     return @as(HFONT, @ptrFromInt(@as(usize, @bitCast(out))));
 }
 
-pub const GetMessageW = win32.user32.getMessageW;
-pub const TranslateMessage = win32.user32.translateMessage;
-pub const DispatchMessageW = win32.user32.dispatchMessageW;
+pub extern "user32" fn GetMessageW(lpMsg: *MSG, hWnd: ?HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT) callconv(WINAPI) BOOL;
+pub extern "user32" fn TranslateMessage(lpMsg: *const MSG) callconv(WINAPI) BOOL;
+pub extern "user32" fn DispatchMessageW(lpMsg: *const MSG) callconv(WINAPI) LRESULT;

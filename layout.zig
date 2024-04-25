@@ -43,7 +43,7 @@ pub export fn Layout(
     };
     //defer allocator.free(colsizes);
 
-    var title_buffer = allocator.allocSentinel(win32.WCHAR, 200, 0) catch {
+    const title_buffer = allocator.allocSentinel(win32.WCHAR, 200, 0) catch {
         std.debug.print("couldn't allocate {} chars of {} for control title", .{ 200, win32.WCHAR });
         return;
     };
@@ -72,7 +72,7 @@ pub export fn Layout(
                     _ = win32.GetWindowTextW(cell.control.?, title_buffer, @as(c_int, @intCast(title_buffer.len)));
                     text = title_buffer;
                 }
-                var len = if (text != null) std.mem.len(text.?) else 0;
+                const len = if (text != null) std.mem.len(text.?) else 0;
                 std.debug.print("Title text len {}\n", .{len});
                 if (len > 0) std.debug.print("Title text: '{any}'\n", .{text});
 
@@ -106,7 +106,7 @@ pub export fn Layout(
         colsizes[j] = 0;
 
         for (0..nrow) |i| {
-            var cell = cells[i * ncol + j];
+            const cell = cells[i * ncol + j];
             if (cell.width > colsizes[j]) {
                 colsizes[j] = cell.width;
             }
@@ -118,15 +118,15 @@ pub export fn Layout(
 
     for (0..nrow) |i| {
         var x = left;
-        var h = rowsizes[i];
-        var b = baselines[i];
+        const h = rowsizes[i];
+        const b = baselines[i];
 
         for (0..ncol) |j| {
-            var w = colsizes[j];
+            const w = colsizes[j];
             var cell = cells[i * ncol + j];
 
             if (cell.control != null) {
-                var r = win32.RECT{ .left = x, .right = x + w, .top = y + b - cell.ascender, .bottom = y + h };
+                const r = win32.RECT{ .left = x, .right = x + w, .top = y + b - cell.ascender, .bottom = y + h };
                 std.debug.print("Moving window with r = ({}, {}, {}, {})\n", .{ r.left, r.top, r.right, r.bottom });
                 if (win32.MoveWindow(cell.control.?, r.left, r.top, r.right - r.left, r.bottom - r.top, win32.TRUE) == win32.FALSE) {
                     std.debug.print("MoveWindow() failed\n", .{});

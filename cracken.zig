@@ -22,11 +22,7 @@ pub fn main() !void {
     Window_show(mw, 1);
 
     var msg: win32.MSG = std.mem.zeroes(win32.MSG);
-    while (true) {
-        win32.GetMessageW(&msg, null, 0, 0) catch |err| {
-            if (err == error.Quit) break;
-            return err;
-        };
+    while (win32.GetMessageW(&msg, null, 0, 0) > 0) {
         _ = win32.TranslateMessage(&msg);
         _ = win32.DispatchMessageW(&msg);
     }
