@@ -12,6 +12,7 @@ pub fn build(b: *std.Build) !void {
         .root_source_file = .{ .path = "cracken.zig" },
         .target = tgt,
         .optimize = mode,
+        .win32_manifest = .{ .path = "cracken.manifest" },
     });
     exe.want_lto = true;
 
