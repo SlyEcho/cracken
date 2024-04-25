@@ -32,8 +32,8 @@ static void destroy(self) {
 }
 
 static void update(self) {
-	for (int i = 0; i < private.krakens->length; i++) {
-		Kraken *k = private.krakens->data[i];
+	for (int i = 0; i < KrakenList_length(private.krakens); i++) {
+		Kraken *k = KrakenList_get(private.krakens, i);
 		Kraken_update(k);
 	}
 
@@ -69,11 +69,11 @@ static void created(self) {
 	update(this);
 
 	SetTimer(base.hwnd, ID_UPDATE, 2000, NULL);
-	private.widget_count = private.krakens->length;
+	private.widget_count = KrakenList_length(private.krakens);
 	if (private.widget_count > 0) {
 		private.widgets = xmalloc(sizeof(KrakenWidget *) * private.widget_count);
 		for (size_t i = 0; i < private.widget_count; i++) {
-			private.widgets[i] = KrakenWidget_create(wnd, private.krakens->data[i]);
+			private.widgets[i] = KrakenWidget_create(wnd, KrakenList_get(private.krakens, i));
 			KrakenWidget_update(private.widgets[i]);
 		}
 	}

@@ -80,12 +80,12 @@ KrakenList *Kraken_get_krakens() {
 	HidDeviceList *hids = HidDevice_enumerate();
 	KrakenList *krakens = KrakenList_create(1);
 
-	for (int i = 0; i < hids->length; i++) {
-		HidDevice *hid = hids->data[i];
+	for (int i = 0; i < HidDeviceList_length(hids); i++) {
+		HidDevice *hid = HidDeviceList_get(hids, i);
 		if (hid->vendor_id == 0x1e71 && hid->product_id == 0x170e) {
 			self = Kraken_create(hid);
 			KrakenList_append(krakens, this);
-            hids->data[i] = NULL;
+            HidDeviceList_set(hids, i, NULL);
 		}
 	}
 

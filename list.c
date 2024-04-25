@@ -3,6 +3,12 @@
 #include "list.h"
 #include "xalloc.h"
 
+struct s_List {
+    void **data;
+    size_t length;
+    size_t capacity;
+};
+
 List *List_create(size_t capacity) {
 	List *b = xmalloc(sizeof(List));
 	b->data = xmalloc(sizeof(void *) * capacity);
@@ -37,3 +43,14 @@ void List_append(List *b, void *data) {
 	b->data[b->length++] = data;
 }
 
+size_t List_length(const List *b) {
+	return b->length;
+}
+
+void *List_get(const List *b, size_t i) {
+	return b->data[i];
+}
+
+void List_set(List *b, size_t i, void *data) {
+	b->data[i] = data;
+}
