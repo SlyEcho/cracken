@@ -2,7 +2,7 @@
 
 #include "list.h"
 #include "xalloc.h"
-
+/*
 struct s_List {
     void **data;
     size_t length;
@@ -54,3 +54,4 @@ void *List_get(const List *b, size_t i) {
 void List_set(List *b, size_t i, void *data) {
 	b->data[i] = data;
 }
+*/
