@@ -5,11 +5,12 @@
 #include "hiddevice.h"
 #include "xalloc.h"
 
-HidDevice *HidDevice_create(int vid, int pid, wchar_t *path) {
+/*
+HidDevice *HidDevice_create(unsigned short vid, unsigned short pid, const wchar_t *path) {
 	size_t len = wcslen(path);
-	HidDevice *d = xmalloc(sizeof(HidDevice) + (len + 1) * sizeof(wchar_t));
-	memcpy(d->path, path, sizeof(wchar_t) * len);
-	d->path[len] = 0;
+	HidDevice *d = xcalloc(1, sizeof(HidDevice));
+	d->path = xmalloc((len + 1) * sizeof(wchar_t));
+	memcpy(d->path, path, (len + 1) * sizeof(wchar_t));
 	d->vendor_id = vid;
 	d->product_id = pid;
 	d->serial[0] = 0;
@@ -17,8 +18,10 @@ HidDevice *HidDevice_create(int vid, int pid, wchar_t *path) {
 }
 
 void HidDevice_delete(HidDevice *h) {
+	xfree(h->path);
     xfree(h);
 }
+*/
 
 HidDeviceList *HidDevice_enumerate() {
 	HidDeviceList *list = HidDeviceList_create(10);

@@ -1,6 +1,7 @@
 const std = @import("std");
 const win32 = @import("win32.zig");
 const layout = @import("layout.zig");
+const hiddevice = @import("hiddevice.zig");
 
 extern var App_instance: win32.HINSTANCE;
 const Window = opaque {};
@@ -9,6 +10,8 @@ extern fn Window_show(window: *Window, show: i32) callconv(.C) void;
 
 pub fn main() !void {
     _ = layout; // force layout to build and link
+
+    hiddevice.allocator = std.heap.c_allocator;
 
     App_instance = @as(win32.HINSTANCE, @ptrCast(win32.GetModuleHandleW(null)));
     win32.InitCommonControls();
