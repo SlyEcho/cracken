@@ -3,6 +3,7 @@ const win32 = @import("win32.zig");
 const layout = @import("layout.zig");
 const hiddevice = @import("hiddevice.zig");
 const list = @import("list.zig");
+const denu = @import("deviceenumerator.zig");
 
 extern var App_instance: win32.HINSTANCE;
 const Window = opaque {};
@@ -14,6 +15,7 @@ pub fn main() !void {
 
     hiddevice.allocator = std.heap.c_allocator;
     list.allocator = std.heap.c_allocator;
+    denu.allocator = std.heap.c_allocator;
 
     App_instance = @as(win32.HINSTANCE, @ptrCast(win32.GetModuleHandleW(null)));
     win32.InitCommonControls();
