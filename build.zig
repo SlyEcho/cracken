@@ -24,13 +24,8 @@ pub fn build(b: *std.Build) !void {
     const sources = .{
         "app.c",
         "curve.c",
-        "deviceenumerator.c",
-        "hiddevice.c",
         "kraken.c",
         "krakenwidget.c",
-        "layout.c",
-        "list.c",
-        "main.c",
         "mainwindow.c",
         "window.c",
         "xalloc.c",
