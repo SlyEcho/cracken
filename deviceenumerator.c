@@ -5,7 +5,7 @@
 
 #include "deviceenumerator.h"
 #include "xalloc.h"
-
+/*
 struct s_DeviceEnumerator {
 	GUID guid;
 	HDEVINFO handle;
@@ -36,7 +36,7 @@ void DeviceEnumerator_delete(self) {
 }
 
 bool DeviceEnumerator_move_next(self) {
-	return SetupDiEnumDeviceInterfaces(private.handle, NULL, &private.guid, ++(private.currentDeviceNr), private.interfaceData);
+	return SetupDiEnumDeviceInterfaces(private.handle, NULL, &private.guid, private.currentDeviceNr++, private.interfaceData);
 }
 
 HidDevice *DeviceEnumerator_get_device(self) {
@@ -75,3 +75,4 @@ exit:
 
 	return d;
 }
+*/

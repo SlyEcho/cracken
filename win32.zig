@@ -22,6 +22,11 @@ pub const HWND = win32.HWND;
 pub const HDC = win32.HDC;
 pub const TRUE = win32.TRUE;
 pub const FALSE = win32.FALSE;
+pub const GUID = win32.GUID;
+pub const HANDLE = win32.HANDLE;
+pub const INVALID_HANDLE_VALUE = @as(HANDLE, @ptrFromInt(@as(usize, @bitCast(@as(isize, -1)))));
+pub const HDEVINFO = *opaque {};
+
 pub const POINT = extern struct {
     x: LONG,
     y: LONG,
@@ -59,6 +64,28 @@ pub const TEXTMETRICW = extern struct {
     tmPitchAndFamily: BYTE,
     tmCharSet: BYTE,
 };
+pub const SP_DEVINFO_DATA = extern struct {
+    cbSize: u32,
+    ClassGuid: GUID,
+    DevInst: u32,
+    Reserved: *anyopaque,
+};
+pub const SP_DEVICE_INTERFACE_DATA = extern struct {
+    cbSize: u32,
+    InterfaceClassGuid: GUID,
+    Flags: u32,
+    Reserved: *anyopaque,
+};
+pub const SP_DEVICE_INTERFACE_DETAIL_DATA_W = extern struct {
+    cbSize: u32,
+    DevicePath: [1]u16,
+};
+pub const HIDD_ATTRIBUTES = extern struct {
+    Size: u32,
+    VendorID: u16,
+    ProductID: u16,
+    VersionNumber: u16,
+};
 
 pub extern "kernel32" fn GetModuleHandleW(lpModuleName: ?PCWSTR) callconv(WINAPI) HMODULE;
 pub extern "comctl32" fn InitCommonControls() callconv(WINAPI) void;
@@ -93,3 +120,59 @@ pub fn GetWindowFont(hwnd: HWND) !HFONT {
 pub extern "user32" fn GetMessageW(lpMsg: *MSG, hWnd: ?HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT) callconv(WINAPI) BOOL;
 pub extern "user32" fn TranslateMessage(lpMsg: *const MSG) callconv(WINAPI) BOOL;
 pub extern "user32" fn DispatchMessageW(lpMsg: *const MSG) callconv(WINAPI) LRESULT;
+
+pub const GENERIC_READ = 0x80000000;
+pub const GENERIC_WRITE = 0x40000000;
+pub const GENERIC_EXECUTE = 0x20000000;
+pub const GENERIC_ALL = 0x10000000;
+pub const FILE_SHARE_READ = 0x00000001;
+pub const FILE_SHARE_WRITE = 0x00000002;
+pub const FILE_SHARE_DELETE = 0x00000004;
+pub const CREATE_NEW = 1;
+pub const CREATE_ALWAYS = 2;
+pub const OPEN_EXISTING = 3;
+pub const OPEN_ALWAYS = 4;
+pub const TRUNCATE_EXISTING = 5;
+pub const DIGCF_DEFAULT = 0x00000001; // only valid with DIGCF_DEVICEINTERFACE
+pub const DIGCF_PRESENT = 0x00000002;
+pub const DIGCF_ALLCLASSES = 0x00000004;
+pub const DIGCF_PROFILE = 0x00000008;
+pub const DIGCF_DEVICEINTERFACE = 0x00000010;
+pub const DIGCF_INTERFACEDEVICE = DIGCF_DEVICEINTERFACE;
+
+pub const CreateFileW = win32.kernel32.CreateFileW;
+pub const CloseHandle = win32.kernel32.CloseHandle;
+
+pub extern "setupapi" fn HidD_GetHidGuid(HidGuid: *GUID) callconv(WINAPI) void;
+pub extern "setupapi" fn SetupDiGetClassDevsW(
+    ClassGuid: *const GUID,
+    Enumerator: [*c]const u16,
+    hwndParent: ?HWND,
+    Flags: u32,
+) callconv(WINAPI) HDEVINFO;
+pub extern "setupapi" fn SetupDiDestroyDeviceInfoList(DeviceInfoSet: HDEVINFO) callconv(WINAPI) BOOL;
+pub extern "setupapi" fn SetupDiEnumDeviceInterfaces(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInfoData: ?*SP_DEVINFO_DATA,
+    InterfaceClassGuid: *const GUID,
+    MemberIndex: u32,
+    DeviceInterfaceDat: *SP_DEVICE_INTERFACE_DATA,
+) callconv(WINAPI) BOOL;
+pub extern "setupapi" fn SetupDiGetDeviceInterfaceDetailW(
+    DeviceInfoSet: HDEVINFO,
+    DeviceInterfaceData: *SP_DEVICE_INTERFACE_DATA,
+    DeviceInterfaceDetailData: ?*SP_DEVICE_INTERFACE_DETAIL_DATA_W,
+    DeviceInterfaceDetailDataSize: u32,
+    RequiredSize: *u32,
+    DeviceInfoData: ?*SP_DEVINFO_DATA,
+) callconv(WINAPI) BOOL;
+
+pub extern "hid" fn HidD_GetAttributes(
+    HidDeviceObject: HANDLE,
+    Attributes: *HIDD_ATTRIBUTES,
+) callconv(WINAPI) BOOL;
+pub extern "hid" fn HidD_GetSerialNumberString(
+    HidDeviceObject: HANDLE,
+    Buffer: [*:0]u16,
+    BufferLength: u32,
+) callconv(WINAPI) BOOL;
