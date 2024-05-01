@@ -29,7 +29,7 @@ void Kraken_delete(self) {
 		CloseHandle(private.writer);
 	}
 	HidDevice_delete(public.device);
-	xfree(this);
+	xfree(this, sizeof(private_Kraken));
 }
 
 void Kraken_update(self) {

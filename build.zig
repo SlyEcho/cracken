@@ -28,7 +28,6 @@ pub fn build(b: *std.Build) !void {
         "krakenwidget.c",
         "mainwindow.c",
         "window.c",
-        "xalloc.c",
     };
 
     exe.addCSourceFiles(.{ .files = &sources, .flags = &flags });

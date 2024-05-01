@@ -5,6 +5,7 @@ const deviceenumerator = @import("deviceenumerator.zig");
 const hiddevice = @import("hiddevice.zig");
 const layout = @import("layout.zig");
 const list = @import("list.zig");
+const xalloc = @import("xalloc.zig");
 
 const Window = opaque {};
 extern fn MainWindow_create() callconv(.C) *Window;
@@ -15,6 +16,7 @@ pub fn main() !void {
     _ = hiddevice;
     _ = layout;
     _ = list;
+    _ = xalloc;
 
     app.instance = @ptrCast(win32.GetModuleHandleW(null));
     app.allocator = std.heap.c_allocator;
