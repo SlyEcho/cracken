@@ -12,7 +12,7 @@ const LayoutCell = extern struct {
     control: ?win32.HWND,
 };
 
-pub export fn Layout(
+pub fn layout(
     hdc: win32.HDC,
     left: i32,
     top: i32,
@@ -25,29 +25,18 @@ pub export fn Layout(
     var fba = std.heap.FixedBufferAllocator.init(&buffer);
     const allocator = fba.allocator();
 
-    var rowsizes: []c_int = allocator.alloc(c_int, nrow) catch {
-        std.debug.print("couldn't allocate {1} rows of {0} row sizes\n", .{ c_int, nrow });
-        return;
+    var rowsizes = allocator.alloc(c_int, nrow) catch {
+        unreachable;
     };
-    //defer allocator.free(rowsizes);
-
-    var baselines: []c_int = allocator.alloc(c_int, nrow) catch {
-        std.debug.print("couldn't allocate {1} rows of {0} baselines\n", .{ c_int, nrow });
-        return;
+    var baselines = allocator.alloc(c_int, nrow) catch {
+        unreachable;
     };
-    //defer allocator.free(baselines);
-
-    var colsizes: []c_int = allocator.alloc(c_int, ncol) catch {
-        std.debug.print("couldn't allocate {1} cols of {0} col sizes\n", .{ c_int, nrow });
-        return;
+    var colsizes = allocator.alloc(c_int, ncol) catch {
+        unreachable;
     };
-    //defer allocator.free(colsizes);
-
     const title_buffer = allocator.allocSentinel(win32.WCHAR, 200, 0) catch {
-        std.debug.print("couldn't allocate {} chars of {} for control title", .{ 200, win32.WCHAR });
-        return;
+        unreachable;
     };
-    //defer allocator.free(title_buffer);
 
     for (0..nrow) |i| {
         rowsizes[i] = 0;
@@ -142,4 +131,8 @@ pub export fn Layout(
     }
 
     std.debug.print("Layout() done\n", .{});
+}
+
+comptime {
+    @export(layout, .{ .name = "Layout", .linkage = .strong });
 }

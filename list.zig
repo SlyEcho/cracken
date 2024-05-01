@@ -3,9 +3,9 @@ const app = @import("app.zig");
 
 const ItemType = ?*anyopaque;
 const fn_delete = *const fn (ItemType) callconv(.C) void;
-const ContainerType = std.ArrayList(ItemType);
+pub const ContainerType = std.ArrayList(ItemType);
 
-pub export fn List_create(capacity: usize) callconv(.C) *ContainerType {
+pub fn create(capacity: usize) callconv(.C) *ContainerType {
     const b = app.allocator.create(ContainerType) catch {
         unreachable;
     };
@@ -17,7 +17,7 @@ pub export fn List_create(capacity: usize) callconv(.C) *ContainerType {
     return b;
 }
 
-pub export fn List_delete(b: *ContainerType, deleter: ?fn_delete) callconv(.C) void {
+pub fn delete(b: *ContainerType, deleter: ?fn_delete) callconv(.C) void {
     if (deleter) |del| {
         for (b.items) |i| {
             if (i != null) {
@@ -29,20 +29,29 @@ pub export fn List_delete(b: *ContainerType, deleter: ?fn_delete) callconv(.C) v
     app.allocator.destroy(b);
 }
 
-pub export fn List_append(b: *ContainerType, data: ItemType) callconv(.C) void {
+pub fn append(b: *ContainerType, data: ItemType) callconv(.C) void {
     b.append(data) catch {
         unreachable;
     };
 }
 
-pub export fn List_length(b: *const ContainerType) callconv(.C) usize {
+pub fn length(b: *const ContainerType) callconv(.C) usize {
     return b.items.len;
 }
 
-pub export fn List_get(b: *const ContainerType, i: usize) callconv(.C) ItemType {
+pub fn get(b: *const ContainerType, i: usize) callconv(.C) ItemType {
     return b.items[i];
 }
 
-pub export fn List_set(b: *ContainerType, i: usize, data: ItemType) callconv(.C) void {
+pub fn set(b: *ContainerType, i: usize, data: ItemType) callconv(.C) void {
     b.items[i] = data;
+}
+
+comptime {
+    @export(create, .{ .name = "List_create", .linkage = .strong });
+    @export(delete, .{ .name = "List_delete", .linkage = .strong });
+    @export(append, .{ .name = "List_append", .linkage = .strong });
+    @export(length, .{ .name = "List_length", .linkage = .strong });
+    @export(get, .{ .name = "List_get", .linkage = .strong });
+    @export(set, .{ .name = "List_set", .linkage = .strong });
 }

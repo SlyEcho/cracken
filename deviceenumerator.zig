@@ -2,6 +2,7 @@ const std = @import("std");
 const app = @import("app.zig");
 const hd = @import("hiddevice.zig");
 const w = @import("win32.zig");
+const List = @import("list.zig");
 
 const Self = @This();
 
@@ -62,7 +63,7 @@ pub fn getDevice(self: *Self) ?*hd.HidDevice {
     if (w.HidD_GetAttributes(file, &attributes) == 0) {
         return null;
     }
-    const d = hd.HidDevice_create(attributes.VendorID, attributes.ProductID, path);
+    const d = hd.HidDevice.init(attributes.VendorID, attributes.ProductID, path);
     if (w.HidD_GetSerialNumberString(file, @ptrCast(&d.serial[0]), d.serial.len) == w.FALSE) {
         d.serial[0] = 0;
     }
@@ -70,18 +71,20 @@ pub fn getDevice(self: *Self) ?*hd.HidDevice {
     return d;
 }
 
-const List = @import("list.zig");
-
-pub export fn HidDevice_enumerate() callconv(.C) *anyopaque {
-    const list = List.List_create(10);
+pub fn enumerate() callconv(.C) *List.ContainerType {
+    const list = List.create(10);
     var de = Self.init();
     defer de.deinit();
 
     while (de.moveNext()) {
         if (de.getDevice()) |device| {
-            List.List_append(list, device);
+            List.append(list, device);
         }
     }
 
-    return @ptrCast(list);
+    return list;
+}
+
+comptime {
+    @export(enumerate, .{ .name = "HidDevice_enumerate", .linkage = .strong });
 }
