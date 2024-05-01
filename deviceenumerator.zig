@@ -1,9 +1,9 @@
 const std = @import("std");
+const app = @import("app.zig");
 const hd = @import("hiddevice.zig");
 const w = @import("win32.zig");
-const Self = @This();
 
-pub var allocator: std.mem.Allocator = undefined;
+const Self = @This();
 
 guid: w.GUID,
 handle: w.HDEVINFO,
@@ -40,10 +40,10 @@ pub fn getDevice(self: *Self) ?*hd.HidDevice {
     var detailDataSize: u32 = 0;
     _ = w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, null, detailDataSize, &detailDataSize, null);
 
-    const detailDataBuf = allocator.alignedAlloc(u8, 8, detailDataSize) catch {
+    const detailDataBuf = app.allocator.alignedAlloc(u8, 8, detailDataSize) catch {
         return null;
     };
-    defer allocator.free(detailDataBuf);
+    defer app.allocator.free(detailDataBuf);
 
     var detailData = std.mem.bytesAsValue(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, detailDataBuf);
     detailData.cbSize = @sizeOf(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W);

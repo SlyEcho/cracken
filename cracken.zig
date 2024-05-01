@@ -1,23 +1,24 @@
 const std = @import("std");
 const win32 = @import("win32.zig");
-const layout = @import("layout.zig");
+const app = @import("app.zig");
+const deviceenumerator = @import("deviceenumerator.zig");
 const hiddevice = @import("hiddevice.zig");
+const layout = @import("layout.zig");
 const list = @import("list.zig");
-const denu = @import("deviceenumerator.zig");
 
-extern var App_instance: win32.HINSTANCE;
 const Window = opaque {};
 extern fn MainWindow_create() callconv(.C) *Window;
 extern fn Window_show(window: *Window, show: i32) callconv(.C) void;
 
 pub fn main() !void {
-    _ = layout; // force layout to build and link
+    _ = deviceenumerator;
+    _ = hiddevice;
+    _ = layout;
+    _ = list;
 
-    hiddevice.allocator = std.heap.c_allocator;
-    list.allocator = std.heap.c_allocator;
-    denu.allocator = std.heap.c_allocator;
+    app.instance = @ptrCast(win32.GetModuleHandleW(null));
+    app.allocator = std.heap.c_allocator;
 
-    App_instance = @ptrCast(win32.GetModuleHandleW(null));
     win32.InitCommonControls();
 
     const mw: *Window = MainWindow_create();

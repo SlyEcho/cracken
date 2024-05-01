@@ -1,16 +1,16 @@
 const std = @import("std");
+const app = @import("app.zig");
+
 const ItemType = ?*anyopaque;
 const fn_delete = *const fn (ItemType) callconv(.C) void;
 const ContainerType = std.ArrayList(ItemType);
 
-pub var allocator: std.mem.Allocator = undefined;
-
 pub export fn List_create(capacity: usize) callconv(.C) *ContainerType {
-    const b = allocator.create(ContainerType) catch {
+    const b = app.allocator.create(ContainerType) catch {
         unreachable;
     };
 
-    b.* = ContainerType.initCapacity(allocator, capacity) catch {
+    b.* = ContainerType.initCapacity(app.allocator, capacity) catch {
         unreachable;
     };
 
@@ -26,7 +26,7 @@ pub export fn List_delete(b: *ContainerType, deleter: ?fn_delete) callconv(.C) v
         }
     }
     b.deinit();
-    allocator.destroy(b);
+    app.allocator.destroy(b);
 }
 
 pub export fn List_append(b: *ContainerType, data: ItemType) callconv(.C) void {

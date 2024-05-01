@@ -10,20 +10,19 @@ pub fn build(b: *std.Build) !void {
 
     const exe = b.addExecutable(.{
         .name = "cracken",
-        .root_source_file = .{ .path = "cracken.zig" },
+        .root_source_file = b.path("cracken.zig"),
         .target = tgt,
         .optimize = mode,
-        .win32_manifest = .{ .path = "cracken.manifest" },
+        .win32_manifest = b.path("cracken.manifest"),
     });
-    exe.want_lto = true;
 
     if (mode != .Debug) {
         exe.subsystem = .Windows;
+        exe.want_lto = true;
     }
 
     const flags = .{ "-DUNICODE", "-D_UNICODE", "-DWIN32_LEAN_AND_MEAN" };
     const sources = .{
-        "app.c",
         "curve.c",
         "kraken.c",
         "krakenwidget.c",
