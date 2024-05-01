@@ -7,6 +7,7 @@ pub fn build(b: *std.Build) !void {
             .arch_os_abi = "x86_64-windows-gnu",
         }),
     });
+
     const exe = b.addExecutable(.{
         .name = "cracken",
         .root_source_file = .{ .path = "cracken.zig" },

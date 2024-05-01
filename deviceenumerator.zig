@@ -40,18 +40,18 @@ pub fn getDevice(self: *Self) ?*hd.HidDevice {
     var detailDataSize: u32 = 0;
     _ = w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, null, detailDataSize, &detailDataSize, null);
 
-    const detailDataBuf = allocator.alloc(u8, detailDataSize) catch {
+    const detailDataBuf = allocator.alignedAlloc(u8, 8, detailDataSize) catch {
         return null;
     };
     defer allocator.free(detailDataBuf);
 
     var detailData = std.mem.bytesAsValue(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, detailDataBuf);
     detailData.cbSize = @sizeOf(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W);
-    if (w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, @alignCast(detailData), detailDataSize, &detailDataSize, null) == w.FALSE) {
+    if (w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, detailData, detailDataSize, &detailDataSize, null) == w.FALSE) {
         return null;
     }
 
-    const path: [*c]align(2) u16 = @alignCast(@ptrCast(&detailData.DevicePath[0]));
+    const path: [*c]u16 = @ptrCast(&detailData.DevicePath[0]);
     const file = w.CreateFileW(path, w.GENERIC_READ | w.GENERIC_WRITE, w.FILE_SHARE_READ | w.FILE_SHARE_WRITE, null, w.OPEN_EXISTING, 0, null);
     if (file == w.INVALID_HANDLE_VALUE) {
         return null;

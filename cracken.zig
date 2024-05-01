@@ -17,7 +17,7 @@ pub fn main() !void {
     list.allocator = std.heap.c_allocator;
     denu.allocator = std.heap.c_allocator;
 
-    App_instance = @as(win32.HINSTANCE, @ptrCast(win32.GetModuleHandleW(null)));
+    App_instance = @ptrCast(win32.GetModuleHandleW(null));
     win32.InitCommonControls();
 
     const mw: *Window = MainWindow_create();

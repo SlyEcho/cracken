@@ -18,14 +18,6 @@ void* xcalloc(size_t count, size_t size) {
     return mem;
 }
 
-void *xrealloc(void *ptr, size_t size) {
-    void *mem = realloc(ptr, size);
-    if (!mem) {
-        exit(1);
-    }
-    return mem;
-}
-
 void xfree(void *ptr) {
     if (ptr) free(ptr);
 }
