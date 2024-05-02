@@ -25,18 +25,10 @@ pub fn layout(
     var fba = std.heap.FixedBufferAllocator.init(&buffer);
     const allocator = fba.allocator();
 
-    var rowsizes = allocator.alloc(c_int, nrow) catch {
-        unreachable;
-    };
-    var baselines = allocator.alloc(c_int, nrow) catch {
-        unreachable;
-    };
-    var colsizes = allocator.alloc(c_int, ncol) catch {
-        unreachable;
-    };
-    const title_buffer = allocator.allocSentinel(win32.WCHAR, 200, 0) catch {
-        unreachable;
-    };
+    var rowsizes = allocator.alloc(c_int, nrow) catch unreachable;
+    var baselines = allocator.alloc(c_int, nrow) catch unreachable;
+    var colsizes = allocator.alloc(c_int, ncol) catch unreachable;
+    const title_buffer = allocator.allocSentinel(win32.WCHAR, 200, 0) catch unreachable;
 
     for (0..nrow) |i| {
         rowsizes[i] = 0;

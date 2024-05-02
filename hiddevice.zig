@@ -8,14 +8,8 @@ pub const HidDevice = extern struct {
     path: [*:0]u16,
 
     pub fn init(vid: u16, pid: u16, path: [*:0]const u16) callconv(.C) *HidDevice {
-        const d = app.allocator.create(HidDevice) catch {
-            unreachable;
-        };
-
-        d.path = app.allocator.dupeZ(u16, std.mem.span(path)) catch {
-            unreachable;
-        };
-
+        const d = app.allocator.create(HidDevice) catch unreachable;
+        d.path = app.allocator.dupeZ(u16, std.mem.span(path)) catch unreachable;
         d.vendor_id = vid;
         d.product_id = pid;
         d.serial[0] = 0;
