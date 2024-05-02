@@ -6,6 +6,7 @@
 
 typedef struct {
 	Kraken public;
+	HidDevice *device;
 	HANDLE reader;
 	HANDLE writer;
 } private_Kraken;
@@ -17,7 +18,9 @@ typedef struct {
 Kraken *Kraken_create(HidDevice *device) {
 	self = xmalloc(sizeof(private_Kraken));
 
-	public.device = device;
+	swprintf(public.ident, sizeof(public.ident)/sizeof(public.ident[0]), L"X52 (%s)", device->serial);
+
+	private.device = device;
 	private.reader = CreateFile(device->path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
 	private.writer = NULL;
 
@@ -28,7 +31,7 @@ void Kraken_delete(self) {
 	if (private.writer) {
 		CloseHandle(private.writer);
 	}
-	HidDevice_delete(public.device);
+	HidDevice_delete(private.device);
 	xfree(this, sizeof(private_Kraken));
 }
 
@@ -43,10 +46,15 @@ void Kraken_update(self) {
 	}
 }
 
+enum FanOrPump {
+	FAN = 0,
+	PUMP = 1,
+};
+
 static void Kraken_control(self, int isSave, enum FanOrPump fanOrpump, int size, const BYTE *levels, int interval) {
 
 	if (private.writer == NULL) {
-		private.writer = CreateFile(public.device->path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
+		private.writer = CreateFile(private.device->path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
 	}
 
 	if (private.writer == NULL) {

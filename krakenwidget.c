@@ -219,7 +219,7 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 
 	private.values.fan = MAKE_STATIC(L"", SS_LEFT);
 	private.values.pump = MAKE_STATIC(L"", SS_LEFT);
-	private.values.device = MAKE_STATIC(kraken->device->serial, SS_LEFT);
+	private.values.device = MAKE_STATIC(kraken->ident, SS_LEFT);
 	private.values.temp = MAKE_STATIC(L"", SS_LEFT);
 
 	return this;

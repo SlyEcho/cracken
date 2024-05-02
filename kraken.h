@@ -4,13 +4,8 @@
 #include "list.h"
 #include "hiddevice.h"
 
-enum FanOrPump {
-	FAN = 0,
-	PUMP = 1,
-};
-
 typedef struct {
-	HidDevice *device;
+	wchar_t ident[128];
 	int device_nr;
 	double temp_c;
 	double fan_rpm;
