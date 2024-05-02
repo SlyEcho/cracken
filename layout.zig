@@ -4,11 +4,11 @@ const win32 = @import("win32.zig");
 const LayoutCell = extern struct {
     text: ?win32.PWSTR,
     font: ?win32.HFONT,
-    height: c_int,
-    width: c_int,
-    ascender: c_int,
-    x: c_int,
-    y: c_int,
+    height: i32,
+    width: i32,
+    ascender: i32,
+    x: i32,
+    y: i32,
     control: ?win32.HWND,
 };
 
@@ -25,9 +25,9 @@ pub fn layout(
     var fba = std.heap.FixedBufferAllocator.init(&buffer);
     const allocator = fba.allocator();
 
-    var rowsizes = allocator.alloc(c_int, nrow) catch unreachable;
-    var baselines = allocator.alloc(c_int, nrow) catch unreachable;
-    var colsizes = allocator.alloc(c_int, ncol) catch unreachable;
+    const rowsizes = allocator.alloc(i32, nrow) catch unreachable;
+    const baselines = allocator.alloc(i32, nrow) catch unreachable;
+    const colsizes = allocator.alloc(i32, ncol) catch unreachable;
     const title_buffer = allocator.allocSentinel(win32.WCHAR, 200, 0) catch unreachable;
 
     for (0..nrow) |i| {
@@ -50,7 +50,7 @@ pub fn layout(
                 if (text == null and cell.control != null) {
                     std.debug.print("Getting title\n", .{});
 
-                    _ = win32.GetWindowTextW(cell.control.?, title_buffer, @as(c_int, @intCast(title_buffer.len)));
+                    _ = win32.GetWindowTextW(cell.control.?, title_buffer, @intCast(title_buffer.len));
                     text = title_buffer;
                 }
                 const len = if (text != null) std.mem.len(text.?) else 0;
@@ -60,7 +60,7 @@ pub fn layout(
                 var size: win32.SIZE = undefined;
                 var metrics: win32.TEXTMETRICW = undefined;
 
-                _ = win32.GetTextExtentPoint32W(hdc, text.?, @as(c_int, @intCast(len)), &size);
+                _ = win32.GetTextExtentPoint32W(hdc, text.?, @intCast(len), &size);
                 _ = win32.GetTextMetricsW(hdc, &metrics);
 
                 cell.width = size.cx;
