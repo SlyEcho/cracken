@@ -4,21 +4,22 @@
 #include "kraken.h"
 #include "xalloc.h"
 
-typedef struct {
-	Kraken public;
+struct s_Kraken {
 	HidDevice *device;
 	HANDLE reader;
 	HANDLE writer;
-} private_Kraken;
+	wchar_t ident[128];
+	DeviceInfo info;
+};
 
 #define self Kraken *this
-#define public (*this)
-#define private (*((private_Kraken*)this))
+#define private (*this)
+#define lengthof(T) (sizeof(T)/sizeof((T)[0]))
 
 Kraken *Kraken_create(HidDevice *device) {
-	self = xmalloc(sizeof(private_Kraken));
+	self = xmalloc(sizeof(Kraken));
 
-	swprintf(public.ident, sizeof(public.ident)/sizeof(public.ident[0]), L"X52 (%s)", device->serial);
+	swprintf(private.ident, lengthof(private.ident), L"X52 (%s)", device->serial);
 
 	private.device = device;
 	private.reader = CreateFile(device->path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
@@ -26,24 +27,34 @@ Kraken *Kraken_create(HidDevice *device) {
 
 	return this;
 }
+
 void Kraken_delete(self) {
 	CloseHandle(private.reader);
 	if (private.writer) {
 		CloseHandle(private.writer);
 	}
 	HidDevice_delete(private.device);
-	xfree(this, sizeof(private_Kraken));
+	xfree(this, sizeof(Kraken));
 }
 
 void Kraken_update(self) {
 	BYTE packet[65];
 	DWORD num;
+	DeviceInfo *info = &private.info;
 	if (ReadFile(private.reader, packet, 65, &num, NULL)) {
-		public.device_nr = (int) packet[10];
-		public.temp_c = (double) packet[1] + (double) packet[2] * 0.1;
-		public.fan_rpm = (int) packet[3] << 8 | (int) packet[4];
-		public.pump_rpm = (int) packet[5] << 8 | (int) packet[6];
+		//info->device_nr = (int) packet[10];
+		info->temp_c = (double) packet[1] + (double) packet[2] * 0.1;
+		info->fan_rpm = (int) packet[3] << 8 | (int) packet[4];
+		info->pump_rpm = (int) packet[5] << 8 | (int) packet[6];
 	}
+}
+
+wchar_t *Kraken_get_ident(const self) {
+	return private.ident;
+}
+
+DeviceInfo *Kraken_get_info(const self) {
+	return &private.info;
 }
 
 enum FanOrPump {

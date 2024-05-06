@@ -45,14 +45,17 @@ typedef struct {
 void KrakenWidget_update(self) {
 	Kraken *k = public.kraken;
 	wchar_t buffer[20];
+	
+	DeviceInfo *info = Kraken_get_info(k);
+	if (info == NULL) return;
 
-	swprintf(buffer, 20, L"%.1f \u00b0C", k->temp_c);
+	swprintf(buffer, 20, L"%.1f \u00b0C", info->temp_c);
 	SetWindowText(private.values.temp, buffer);
 
-	swprintf(buffer, 20, L"%.0f rpm", k->fan_rpm);
+	swprintf(buffer, 20, L"%.0f rpm", info->fan_rpm);
 	SetWindowText(private.values.fan, buffer);
 
-	swprintf(buffer, 20, L"%.0f rpm", k->pump_rpm);
+	swprintf(buffer, 20, L"%.0f rpm", info->pump_rpm);
 	SetWindowText(private.values.pump, buffer);
 }
 
@@ -219,7 +222,7 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 
 	private.values.fan = MAKE_STATIC(L"", SS_LEFT);
 	private.values.pump = MAKE_STATIC(L"", SS_LEFT);
-	private.values.device = MAKE_STATIC(kraken->ident, SS_LEFT);
+	private.values.device = MAKE_STATIC(Kraken_get_ident(kraken), SS_LEFT);
 	private.values.temp = MAKE_STATIC(L"", SS_LEFT);
 
 	return this;
