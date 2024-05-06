@@ -36,26 +36,26 @@ pub fn layout(
 
         for (0..ncol) |j| {
             var cell = cells[i * ncol + j];
-            std.debug.print("processing cell {}, {}, control: {x}\n", .{ i, j, @intFromPtr(cell.control) });
+            //std.debug.print("processing cell {}, {}, control: {x}\n", .{ i, j, @intFromPtr(cell.control) });
             if (cell.font == null and cell.control != null) {
-                std.debug.print("getting font\n", .{});
+                //std.debug.print("getting font\n", .{});
                 cell.font = win32.GetWindowFont(cell.control.?) catch null;
             }
 
             if (cell.font != null) {
-                std.debug.print("selecting font: {x}\n", .{@intFromPtr(cell.font)});
+                //std.debug.print("selecting font: {x}\n", .{@intFromPtr(cell.font)});
                 _ = win32.SelectObject(hdc, @ptrCast(cell.font.?));
 
                 var text: ?win32.PWSTR = cell.text;
                 if (text == null and cell.control != null) {
-                    std.debug.print("Getting title\n", .{});
+                    //std.debug.print("Getting title\n", .{});
 
                     _ = win32.GetWindowTextW(cell.control.?, title_buffer, @intCast(title_buffer.len));
                     text = title_buffer;
                 }
                 const len = if (text != null) std.mem.len(text.?) else 0;
-                std.debug.print("Title text len {}\n", .{len});
-                if (len > 0) std.debug.print("Title text: '{any}'\n", .{text});
+                //std.debug.print("Title text len {}\n", .{len});
+                //if (len > 0) std.debug.print("Title text: '{any}'\n", .{text});
 
                 var size: win32.SIZE = undefined;
                 var metrics: win32.TEXTMETRICW = undefined;
@@ -67,7 +67,7 @@ pub fn layout(
                 cell.height = metrics.tmHeight;
                 cell.ascender = metrics.tmAscent;
             } else {
-                std.debug.print("Cell has no font\n", .{});
+                //std.debug.print("Cell has no font\n", .{});
                 cell.width = 0;
                 cell.height = 0;
                 cell.ascender = 0;
@@ -81,7 +81,7 @@ pub fn layout(
             }
         }
     }
-    std.debug.print("Measure done\n", .{});
+    //std.debug.print("Measure done\n", .{});
 
     for (0..ncol) |j| {
         colsizes[j] = 0;
@@ -93,7 +93,7 @@ pub fn layout(
             }
         }
     }
-    std.debug.print("Column maximums done\n", .{});
+    //std.debug.print("Column maximums done\n", .{});
 
     var y = top;
 
@@ -108,9 +108,9 @@ pub fn layout(
 
             if (cell.control != null) {
                 const r = win32.RECT{ .left = x, .right = x + w, .top = y + b - cell.ascender, .bottom = y + h };
-                std.debug.print("Moving window with r = ({}, {}, {}, {})\n", .{ r.left, r.top, r.right, r.bottom });
+                //std.debug.print("Moving window with r = ({}, {}, {}, {})\n", .{ r.left, r.top, r.right, r.bottom });
                 if (win32.MoveWindow(cell.control.?, r.left, r.top, r.right - r.left, r.bottom - r.top, win32.TRUE) == win32.FALSE) {
-                    std.debug.print("MoveWindow() failed\n", .{});
+                    //std.debug.print("MoveWindow() failed\n", .{});
                 }
             }
 
@@ -122,7 +122,7 @@ pub fn layout(
         y += h + margin;
     }
 
-    std.debug.print("Layout() done\n", .{});
+    //std.debug.print("Layout() done\n", .{});
 }
 
 comptime {
