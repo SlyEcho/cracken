@@ -4,7 +4,7 @@ const app = @import("app.zig");
 pub const HidDevice = extern struct {
     product_id: u16,
     vendor_id: u16,
-    serial: [128]u16,
+    serial: [128:0]u16,
     path: [*:0]u16,
 
     pub fn init(vid: u16, pid: u16, path: [*:0]const u16) callconv(.C) *HidDevice {

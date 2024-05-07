@@ -24,7 +24,6 @@ pub fn build(b: *std.Build) !void {
     const flags = .{ "-DUNICODE", "-D_UNICODE", "-DWIN32_LEAN_AND_MEAN" };
     const sources = .{
         "curve.c",
-        "kraken.c",
         "krakenwidget.c",
         "mainwindow.c",
         "window.c",

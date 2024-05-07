@@ -141,6 +141,8 @@ pub const DIGCF_DEVICEINTERFACE = 0x00000010;
 pub const DIGCF_INTERFACEDEVICE = DIGCF_DEVICEINTERFACE;
 
 pub const CreateFileW = win32.kernel32.CreateFileW;
+pub const ReadFile = win32.kernel32.ReadFile;
+pub const WriteFile = win32.kernel32.WriteFile;
 pub const CloseHandle = win32.kernel32.CloseHandle;
 
 pub extern "setupapi" fn HidD_GetHidGuid(HidGuid: *GUID) callconv(WINAPI) void;
