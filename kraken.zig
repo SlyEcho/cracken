@@ -5,23 +5,21 @@ const denu = @import("deviceenumerator.zig");
 const List = @import("list.zig");
 const win32 = @import("win32.zig");
 
-const HANDLE = win32.HANDLE;
-
-pub const Kraken = struct {
-    device: *hd.HidDevice,
-    reader: HANDLE,
-    writer: ?HANDLE,
-    ident: []u16,
-    info: DeviceInfo,
-};
-
 pub const DeviceInfo = extern struct {
     temp_c: f64,
     fan_rpm: f64,
     pump_rpm: f64,
 };
 
-pub export fn Kraken_create(device: *hd.HidDevice) callconv(.C) *Kraken {
+const Kraken = @This();
+
+device: *hd.HidDevice,
+reader: win32.HANDLE,
+writer: ?win32.HANDLE,
+ident: [:0]u16,
+info: DeviceInfo,
+
+pub fn init(device: *hd.HidDevice) callconv(.C) *Kraken {
     var this = app.allocator.create(Kraken) catch unreachable;
 
     const serial = std.mem.sliceTo(&device.serial, 0);
@@ -34,12 +32,12 @@ pub export fn Kraken_create(device: *hd.HidDevice) callconv(.C) *Kraken {
     return this;
 }
 
-pub const FanOrPump = enum(u1) {
+const FanOrPump = enum(u1) {
     FAN = 0,
     PUMP = 1,
 };
 
-pub fn Kraken_control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels: []const u8, interval: u32) void {
+pub fn control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels: []const u8, interval: u32) void {
     if (this.writer == null) {
         this.writer = win32.CreateFileW(this.device.path, win32.GENERIC_WRITE, win32.FILE_SHARE_READ | win32.FILE_SHARE_WRITE, null, win32.OPEN_EXISTING, 0, null);
     }
@@ -50,8 +48,7 @@ pub fn Kraken_control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels:
 
     var packet: [65]u8 = undefined;
 
-    var i: usize = 0;
-    while (i < levels.len) : (i += 1) {
+    for (0..levels.len) |i| {
         @memset(&packet, 0);
 
         packet[0] = 2;
@@ -65,7 +62,7 @@ pub fn Kraken_control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels:
     }
 }
 
-pub export fn Kraken_update(this: *Kraken) callconv(.C) void {
+pub fn update(this: *Kraken) callconv(.C) void {
     var packet: [65]u8 = undefined;
     var num: u32 = undefined;
     if (win32.ReadFile(this.*.reader, @ptrCast(&packet), packet.len, &num, null) != 0) {
@@ -75,34 +72,34 @@ pub export fn Kraken_update(this: *Kraken) callconv(.C) void {
     }
 }
 
-pub export fn Kraken_get_ident(this: *const Kraken) callconv(.C) [*:0]const u16 {
+pub fn getIdent(this: *const Kraken) callconv(.C) [*:0]const u16 {
     return @ptrCast(&this.ident[0]);
 }
 
-pub export fn Kraken_get_info(this: *const Kraken) callconv(.C) ?*const DeviceInfo {
+pub fn getInfo(this: *const Kraken) callconv(.C) ?*const DeviceInfo {
     return &this.info;
 }
 
 const Curve = extern struct {
     name: [*:0]u16,
     length: u8,
-    items: [*c]u8,
+    items: [0]u8,
 };
 
 extern const Curve_fan_presets: [*]const *const Curve;
 extern const Curve_pump_presets: [*]const *const Curve;
 
-pub export fn Kraken_set_pump_curve(this: *Kraken, curve: *const Curve) callconv(.C) void {
+pub fn setPumpCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
-    Kraken_control(this, curve.length > 1, .PUMP, curve.items[0..curve.length], interval);
+    control(this, curve.length > 1, .PUMP, curve.items[0..curve.length], interval);
 }
 
-pub export fn Kraken_set_fan_curve(this: *Kraken, curve: *const Curve) callconv(.C) void {
+pub fn setFanCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
-    Kraken_control(this, curve.length > 1, .FAN, curve.items[0..curve.length], interval);
+    control(this, curve.length > 1, .FAN, curve.items[0..curve.length], interval);
 }
 
-pub export fn Kraken_delete(this: *Kraken) callconv(.C) void {
+pub fn deinit(this: *Kraken) callconv(.C) void {
     _ = win32.CloseHandle(this.reader);
     if (this.writer != null) {
         _ = win32.CloseHandle(this.writer.?);
@@ -112,7 +109,7 @@ pub export fn Kraken_delete(this: *Kraken) callconv(.C) void {
     app.allocator.destroy(this);
 }
 
-pub export fn Kraken_get_krakens() callconv(.C) *List.ContainerType {
+pub fn getKrakens() callconv(.C) *List.ContainerType {
     const hids = denu.enumerate();
     defer List.delete(hids, @ptrCast(&hd.HidDevice.deinit));
 
@@ -123,11 +120,22 @@ pub export fn Kraken_get_krakens() callconv(.C) *List.ContainerType {
         const hid: *hd.HidDevice = @alignCast(@ptrCast(List.get(hids, i)));
 
         if (hid.vendor_id == 0x1e71 and hid.product_id == 0x170e) {
-            const this = Kraken_create(hid);
+            const this = init(hid);
             List.append(krakens, this);
             _ = List.set(hids, i, null);
         }
     }
 
     return krakens;
+}
+
+comptime {
+    @export(init, .{ .name = "Kraken_create", .linkage = .strong });
+    @export(update, .{ .name = "Kraken_update", .linkage = .strong });
+    @export(getIdent, .{ .name = "Kraken_get_ident", .linkage = .strong });
+    @export(getInfo, .{ .name = "Kraken_get_info", .linkage = .strong });
+    @export(setPumpCurve, .{ .name = "Kraken_set_pump_curve", .linkage = .strong });
+    @export(setFanCurve, .{ .name = "Kraken_set_fan_curve", .linkage = .strong });
+    @export(deinit, .{ .name = "Kraken_delete", .linkage = .strong });
+    @export(getKrakens, .{ .name = "Kraken_get_krakens", .linkage = .strong });
 }
