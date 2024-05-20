@@ -4,7 +4,6 @@
 
 #include "curve.h"
 #include "list.h"
-#include "hiddevice.h"
 
 struct s_Kraken;
 typedef struct s_Kraken Kraken;

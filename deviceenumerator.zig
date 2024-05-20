@@ -1,6 +1,6 @@
 const std = @import("std");
 const app = @import("app.zig");
-const hd = @import("hiddevice.zig");
+const HidDevice = @import("hiddevice.zig");
 const w = @import("win32.zig");
 
 const Self = @This();
@@ -36,7 +36,7 @@ pub fn moveNext(self: *Self) bool {
     return w.SetupDiEnumDeviceInterfaces(self.handle, null, &self.guid, self.currentDeviceNr, &self.interfaceData) == w.TRUE;
 }
 
-pub fn getDevice(self: *Self) ?*hd.HidDevice {
+pub fn getDevice(self: *Self) ?*HidDevice {
     var detailDataSize: u32 = 0;
     _ = w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, null, detailDataSize, &detailDataSize, null);
 
@@ -62,10 +62,19 @@ pub fn getDevice(self: *Self) ?*hd.HidDevice {
     if (w.HidD_GetAttributes(file, &attributes) == 0) {
         return null;
     }
-    const d = hd.HidDevice.init(attributes.VendorID, attributes.ProductID, path);
-    if (w.HidD_GetSerialNumberString(file, @ptrCast(&d.serial[0]), d.serial.len) == w.FALSE) {
-        d.serial[0] = 0;
+
+    var serial_buf: [128:0]u16 = undefined;
+    const serial: [*c]u16 = @ptrCast(&serial_buf[0]);
+    if (w.HidD_GetSerialNumberString(file, serial, serial_buf.len) == w.FALSE) {
+        serial_buf[0] = 0;
     }
+
+    const d = HidDevice.init(
+        attributes.VendorID,
+        attributes.ProductID,
+        std.mem.span(path),
+        std.mem.span(serial),
+    ) catch null;
 
     return d;
 }

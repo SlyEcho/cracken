@@ -1,6 +1,6 @@
 const std = @import("std");
 const app = @import("app.zig");
-const hd = @import("hiddevice.zig");
+const HidDevice = @import("hiddevice.zig");
 const DeviceEnumerator = @import("deviceenumerator.zig");
 const List = @import("list.zig");
 const win32 = @import("win32.zig");
@@ -13,17 +13,16 @@ pub const DeviceInfo = extern struct {
 
 const Kraken = @This();
 
-device: *hd.HidDevice,
+device: *HidDevice,
 reader: win32.HANDLE,
 writer: ?win32.HANDLE,
 ident: [:0]u16,
 info: DeviceInfo,
 
-pub fn init(device: *hd.HidDevice) *Kraken {
+pub fn init(device: *HidDevice) *Kraken {
     var this = app.allocator.create(Kraken) catch unreachable;
 
-    const serial = std.mem.sliceTo(&device.serial, 0);
-    const ident = std.fmt.allocPrintZ(app.allocator, "X52 ({})", .{std.unicode.fmtUtf16Le(serial)}) catch unreachable;
+    const ident = std.fmt.allocPrintZ(app.allocator, "X52 ({})", .{std.unicode.fmtUtf16Le(device.serial)}) catch unreachable;
     defer app.allocator.free(ident);
     this.ident = std.unicode.utf8ToUtf16LeAllocZ(app.allocator, ident) catch unreachable;
     this.device = device;

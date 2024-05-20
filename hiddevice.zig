@@ -1,28 +1,24 @@
 const std = @import("std");
 const app = @import("app.zig");
 
-pub const HidDevice = extern struct {
-    product_id: u16,
-    vendor_id: u16,
-    serial: [128:0]u16,
-    path: [*:0]u16,
+pub const HidDevice = @This();
 
-    pub fn init(vid: u16, pid: u16, path: [*:0]const u16) callconv(.C) *HidDevice {
-        const d = app.allocator.create(HidDevice) catch unreachable;
-        d.path = app.allocator.dupeZ(u16, std.mem.span(path)) catch unreachable;
-        d.vendor_id = vid;
-        d.product_id = pid;
-        d.serial[0] = 0;
-        return d;
-    }
+product_id: u16,
+vendor_id: u16,
+serial: [:0]u16,
+path: [:0]u16,
 
-    pub fn deinit(h: *HidDevice) callconv(.C) void {
-        app.allocator.free(std.mem.span(h.path));
-        app.allocator.destroy(h);
-    }
-};
+pub fn init(vid: u16, pid: u16, path: []const u16, serial: []const u16) !*HidDevice {
+    const d = try app.allocator.create(HidDevice);
+    d.path = try app.allocator.dupeZ(u16, path);
+    d.serial = try app.allocator.dupeZ(u16, serial);
+    d.vendor_id = vid;
+    d.product_id = pid;
+    return d;
+}
 
-comptime {
-    @export(HidDevice.init, .{ .name = "HidDevice_create", .linkage = .strong });
-    @export(HidDevice.deinit, .{ .name = "HidDevice_delete", .linkage = .strong });
+pub fn deinit(h: *HidDevice) void {
+    app.allocator.free(h.path);
+    app.allocator.free(h.serial);
+    app.allocator.destroy(h);
 }
