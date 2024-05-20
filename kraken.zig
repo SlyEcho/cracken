@@ -82,17 +82,22 @@ pub fn getInfo(this: *const Kraken) callconv(.C) ?*const DeviceInfo {
 const Curve = extern struct {
     name: [*:0]u16,
     length: u8,
-    items: [0]u8,
+    items: [1]u8,
+
+    fn toSlice(c: *const Curve) []const u8 {
+        const a: [*c]const u8 = @ptrCast(&c.items[0]);
+        return a[0..c.length];
+    }
 };
 
 pub fn setPumpCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
-    control(this, curve.length > 1, .PUMP, curve.items[0..curve.length], interval);
+    control(this, curve.length > 1, .PUMP, curve.toSlice(), interval);
 }
 
 pub fn setFanCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
-    control(this, curve.length > 1, .FAN, curve.items[0..curve.length], interval);
+    control(this, curve.length > 1, .FAN, curve.toSlice(), interval);
 }
 
 pub fn deinit(this: *Kraken) callconv(.C) void {
