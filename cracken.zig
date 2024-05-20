@@ -1,11 +1,8 @@
 const std = @import("std");
 const win32 = @import("win32.zig");
 const app = @import("app.zig");
-const deviceenumerator = @import("deviceenumerator.zig");
-const hiddevice = @import("hiddevice.zig");
 const kraken = @import("kraken.zig");
 const layout = @import("layout.zig");
-const list = @import("list.zig");
 const xalloc = @import("xalloc.zig");
 
 const Window = opaque {};
@@ -13,11 +10,8 @@ extern fn MainWindow_create() callconv(.C) *Window;
 extern fn Window_show(window: *Window, show: i32) callconv(.C) void;
 
 pub fn main() !void {
-    _ = deviceenumerator;
-    _ = hiddevice;
     _ = kraken;
     _ = layout;
-    _ = list;
     _ = xalloc;
 
     app.instance = @ptrCast(win32.GetModuleHandleW(null));

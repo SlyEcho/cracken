@@ -2,7 +2,6 @@ const std = @import("std");
 const app = @import("app.zig");
 const hd = @import("hiddevice.zig");
 const w = @import("win32.zig");
-const List = @import("list.zig");
 
 const Self = @This();
 
@@ -69,22 +68,4 @@ pub fn getDevice(self: *Self) ?*hd.HidDevice {
     }
 
     return d;
-}
-
-pub fn enumerate() callconv(.C) *List.ContainerType {
-    const list = List.create(10);
-    var de = Self.init();
-    defer de.deinit();
-
-    while (de.moveNext()) {
-        if (de.getDevice()) |device| {
-            List.append(list, device);
-        }
-    }
-
-    return list;
-}
-
-comptime {
-    @export(enumerate, .{ .name = "HidDevice_enumerate", .linkage = .strong });
 }

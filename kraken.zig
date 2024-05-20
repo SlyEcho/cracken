@@ -1,7 +1,7 @@
 const std = @import("std");
 const app = @import("app.zig");
 const hd = @import("hiddevice.zig");
-const denu = @import("deviceenumerator.zig");
+const DeviceEnumerator = @import("deviceenumerator.zig");
 const List = @import("list.zig");
 const win32 = @import("win32.zig");
 
@@ -19,7 +19,7 @@ writer: ?win32.HANDLE,
 ident: [:0]u16,
 info: DeviceInfo,
 
-pub fn init(device: *hd.HidDevice) callconv(.C) *Kraken {
+pub fn init(device: *hd.HidDevice) *Kraken {
     var this = app.allocator.create(Kraken) catch unreachable;
 
     const serial = std.mem.sliceTo(&device.serial, 0);
@@ -86,9 +86,6 @@ const Curve = extern struct {
     items: [0]u8,
 };
 
-extern const Curve_fan_presets: [*]const *const Curve;
-extern const Curve_pump_presets: [*]const *const Curve;
-
 pub fn setPumpCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
     control(this, curve.length > 1, .PUMP, curve.items[0..curve.length], interval);
@@ -110,19 +107,19 @@ pub fn deinit(this: *Kraken) callconv(.C) void {
 }
 
 pub fn getKrakens() callconv(.C) *List.ContainerType {
-    const hids = denu.enumerate();
-    defer List.delete(hids, @ptrCast(&hd.HidDevice.deinit));
+    var denu = DeviceEnumerator.init();
+    defer denu.deinit();
 
     const krakens = List.create(1);
 
-    var i: usize = 0;
-    while (i < List.length(hids)) : (i += 1) {
-        const hid: *hd.HidDevice = @alignCast(@ptrCast(List.get(hids, i)));
-
-        if (hid.vendor_id == 0x1e71 and hid.product_id == 0x170e) {
-            const this = init(hid);
-            List.append(krakens, this);
-            _ = List.set(hids, i, null);
+    while (denu.moveNext()) {
+        if (denu.getDevice()) |hid| {
+            if (hid.vendor_id == 0x1e71 and hid.product_id == 0x170e) {
+                const this = init(hid);
+                List.append(krakens, this);
+                continue;
+            }
+            hid.deinit();
         }
     }
 
@@ -130,7 +127,6 @@ pub fn getKrakens() callconv(.C) *List.ContainerType {
 }
 
 comptime {
-    @export(init, .{ .name = "Kraken_create", .linkage = .strong });
     @export(update, .{ .name = "Kraken_update", .linkage = .strong });
     @export(getIdent, .{ .name = "Kraken_get_ident", .linkage = .strong });
     @export(getInfo, .{ .name = "Kraken_get_info", .linkage = .strong });
