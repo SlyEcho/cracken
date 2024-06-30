@@ -4,9 +4,9 @@
 #include <wchar.h>
 
 typedef struct {
-	wchar_t *name;
+	wchar_t name[16];
 	uint8_t length;
-	uint8_t items[];
+	uint8_t items[31];
 } Curve;
 
 extern const Curve * const Curve_fan_presets[];

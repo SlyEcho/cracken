@@ -1,5 +1,6 @@
 const std = @import("std");
 const app = @import("app.zig");
+const curves = @import("curve.zig");
 const HidDevice = @import("hiddevice.zig");
 const DeviceEnumerator = @import("deviceenumerator.zig");
 const List = @import("list.zig");
@@ -79,16 +80,7 @@ pub fn getInfo(this: *const Kraken) callconv(.C) ?*const DeviceInfo {
     return &this.info;
 }
 
-const Curve = extern struct {
-    name: [*:0]u16,
-    length: u8,
-    items: [1]u8,
-
-    fn toSlice(c: *const Curve) []const u8 {
-        const a: [*c]const u8 = @ptrCast(&c.items[0]);
-        return a[0..c.length];
-    }
-};
+const Curve = curves.Curve;
 
 pub fn setPumpCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
