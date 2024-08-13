@@ -32,6 +32,6 @@ void List_set(List *b, size_t i, void *data);
     static inline type *type##List_get(const type##List *this, size_t i) { \
         return (type *)List_get((const List *)this, i); \
     } \
-    static inline type *type##List_set(type##List *this, size_t i, type *item) { \
+    static inline void type##List_set(type##List *this, size_t i, type *item) { \
         List_set((List *)this, i, item); \
     }

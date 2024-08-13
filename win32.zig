@@ -105,7 +105,7 @@ pub extern "user32" fn SendMessageTimeoutW(
     lpdwResult: *DWORD_PTR,
 ) callconv(WINAPI) LRESULT;
 
-pub fn GetWindowFont(hwnd: HWND) !HFONT {
+pub fn getWindowFont(hwnd: HWND) !HFONT {
     var out: DWORD_PTR = undefined;
     const WM_GETFONT = 0x0031;
     const result = SendMessageTimeoutW(hwnd, WM_GETFONT, 0, 0, 0x0002, 100, &out);

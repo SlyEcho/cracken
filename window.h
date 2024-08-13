@@ -1,4 +1,6 @@
 #pragma once
+
+#include <windows.h>
 #include <stdbool.h>
 
 struct s_Window;

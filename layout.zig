@@ -39,7 +39,7 @@ pub fn layout(
             //std.debug.print("processing cell {}, {}, control: {x}\n", .{ i, j, @intFromPtr(cell.control) });
             if (cell.font == null and cell.control != null) {
                 //std.debug.print("getting font\n", .{});
-                cell.font = win32.GetWindowFont(cell.control.?) catch null;
+                cell.font = win32.getWindowFont(cell.control.?) catch null;
             }
 
             if (cell.font != null) {
