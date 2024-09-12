@@ -1,3 +1,4 @@
+const builtin = @import("builtin");
 const std = @import("std");
 const win32 = std.os.windows;
 
@@ -74,9 +75,10 @@ pub const SP_DEVICE_INTERFACE_DATA = extern struct {
     cbSize: u32,
     InterfaceClassGuid: GUID,
     Flags: u32,
-    Reserved: *anyopaque,
+    Reserved: usize,
 };
 pub const SP_DEVICE_INTERFACE_DETAIL_DATA_W = extern struct {
+    pub const Size = if (builtin.cpu.arch == .x86) 6 else 8;
     cbSize: u32,
     DevicePath: [1]u16,
 };

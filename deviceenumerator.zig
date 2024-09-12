@@ -46,7 +46,7 @@ pub fn getDevice(self: *Self) ?*HidDevice {
     defer app.allocator.free(detailDataBuf);
 
     var detailData = std.mem.bytesAsValue(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, detailDataBuf);
-    detailData.cbSize = @sizeOf(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W);
+    detailData.cbSize = w.SP_DEVICE_INTERFACE_DETAIL_DATA_W.Size;
     if (w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, detailData, detailDataSize, &detailDataSize, null) == w.FALSE) {
         return null;
     }
