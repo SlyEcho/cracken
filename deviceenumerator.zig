@@ -46,7 +46,7 @@ pub fn getDevice(self: *Self) ?*HidDevice {
     defer app.allocator.free(detailDataBuf);
 
     var detailData = std.mem.bytesAsValue(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, detailDataBuf);
-    detailData.cbSize = w.SP_DEVICE_INTERFACE_DETAIL_DATA_W.Size;
+    detailData.cbSize = w.SP_DEVICE_INTERFACE_DETAIL_DATA_W.SizeOf;
     if (w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, detailData, detailDataSize, &detailDataSize, null) == w.FALSE) {
         return null;
     }
@@ -58,7 +58,7 @@ pub fn getDevice(self: *Self) ?*HidDevice {
     }
     defer _ = w.CloseHandle(file);
     var attributes = std.mem.zeroes(w.HIDD_ATTRIBUTES);
-    attributes.Size = @sizeOf(w.HIDD_ATTRIBUTES);
+    attributes.Size = w.HIDD_ATTRIBUTES.SizeOf;
     if (w.HidD_GetAttributes(file, &attributes) == 0) {
         return null;
     }
