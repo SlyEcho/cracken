@@ -275,8 +275,8 @@ void Window_init(self, Window *parent, wchar_t *title) {
 	public.dpi = GetDpiForWindow(hwnd);
 }
 
-void Window_show(self, int show) {
-	ShowWindow(public.hwnd, show);
+void Window_show(self) {
+	ShowWindow(public.hwnd, SW_SHOWDEFAULT);
 }
 
 void Window_rescale(self, int x, int y, int width, int height) {

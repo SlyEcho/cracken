@@ -7,7 +7,7 @@ const xalloc = @import("xalloc.zig");
 
 const Window = opaque {};
 extern fn MainWindow_create() callconv(.C) *Window;
-extern fn Window_show(window: *Window, show: i32) callconv(.C) void;
+extern fn Window_show(window: *Window) callconv(.C) void;
 
 pub fn main() !void {
     _ = kraken;
@@ -20,7 +20,7 @@ pub fn main() !void {
     win32.InitCommonControls();
 
     const mw: *Window = MainWindow_create();
-    Window_show(mw, 1);
+    Window_show(mw);
 
     var msg: win32.MSG = std.mem.zeroes(win32.MSG);
     while (win32.GetMessageW(&msg, null, 0, 0) > 0) {

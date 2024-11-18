@@ -36,7 +36,7 @@ typedef struct s_Window {
 } Window;
 
 void Window_init(Window *w, Window *parent, wchar_t *title);
-void Window_show(Window *w, int show);
+void Window_show(Window *w);
 void Window_update_scroll(Window *w);
 int Window_scale(Window *w, int dimension);
 int Window_unscale(Window *w, int dimension);
