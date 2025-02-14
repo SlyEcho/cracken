@@ -187,7 +187,7 @@ static WindowClass class = {
 };
 
 KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
-	self = xcalloc(1, sizeof(private_KrakenWidget));
+	self = xmalloc(sizeof(private_KrakenWidget));
 	base.class = &class;
 	private.font = NULL;
 	private.bold_font = NULL;

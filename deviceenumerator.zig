@@ -9,6 +9,7 @@ guid: w.GUID,
 handle: w.HDEVINFO,
 currentDeviceNr: u32,
 interfaceData: w.SP_DEVICE_INTERFACE_DATA,
+arena: std.heap.ArenaAllocator,
 
 pub fn init() Self {
     var hidguid: w.GUID = undefined;
@@ -24,10 +25,12 @@ pub fn init() Self {
         ),
         .currentDeviceNr = 0,
         .interfaceData = .{ .cbSize = @sizeOf(w.SP_DEVICE_INTERFACE_DATA), .InterfaceClassGuid = undefined, .Flags = 0, .Reserved = undefined },
+        .arena = std.heap.ArenaAllocator.init(app.allocator),
     };
 }
 
 pub fn deinit(self: *Self) void {
+    self.arena.deinit();
     _ = w.SetupDiDestroyDeviceInfoList(self.handle);
 }
 
@@ -37,21 +40,21 @@ pub fn moveNext(self: *Self) bool {
 }
 
 pub fn getDevice(self: *Self) ?*HidDevice {
+    const allocator = self.arena.allocator();
+    defer _ = self.arena.reset(.retain_capacity);
+
     var detailDataSize: u32 = 0;
     _ = w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, null, detailDataSize, &detailDataSize, null);
 
-    const detailDataBuf = app.allocator.alignedAlloc(u8, 8, detailDataSize) catch {
-        return null;
-    };
-    defer app.allocator.free(detailDataBuf);
+    const detailDataBuf = allocator.alignedAlloc(u8, @alignOf(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W), detailDataSize) catch return null;
 
-    var detailData = std.mem.bytesAsValue(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, detailDataBuf);
+    var detailData = @as(*w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, @ptrCast(detailDataBuf.ptr));
     detailData.cbSize = w.SP_DEVICE_INTERFACE_DETAIL_DATA_W.SizeOf;
     if (w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, detailData, detailDataSize, &detailDataSize, null) == w.FALSE) {
         return null;
     }
 
-    const path: [*c]u16 = @ptrCast(&detailData.DevicePath[0]);
+    const path: [*c]u16 = @ptrCast(&detailData.DevicePath);
     const file = w.CreateFileW(path, w.GENERIC_READ | w.GENERIC_WRITE, w.FILE_SHARE_READ | w.FILE_SHARE_WRITE, null, w.OPEN_EXISTING, 0, null);
     if (file == w.INVALID_HANDLE_VALUE) {
         return null;

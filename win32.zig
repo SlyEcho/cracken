@@ -80,7 +80,7 @@ pub const SP_DEVICE_INTERFACE_DATA = extern struct {
 pub const SP_DEVICE_INTERFACE_DETAIL_DATA_W = extern struct {
     pub const SizeOf = if (builtin.cpu.arch == .x86) 6 else 8;
     cbSize: u32,
-    DevicePath: [1]u16,
+    DevicePath: u16,
 };
 pub const HIDD_ATTRIBUTES = extern struct {
     pub const SizeOf = 10;
