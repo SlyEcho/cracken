@@ -46,6 +46,21 @@ static void update(self) {
 	UpdateWindow(base.hwnd);
 }
 
+static void load_assets(self, bool reload) {
+	if (private.no_devices) {
+		if (reload) {
+			if (private.font) DeleteObject(private.font);
+			private.font = NULL;
+		}
+
+		if (!private.font) private.font = CreateFont(
+			Window_scale(wnd, 16), 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
+
+		SetWindowFont(private.no_devices, private.font, true);
+		InvalidateRect(base.hwnd, NULL, TRUE);
+	}
+}
+
 static void resize(self) {
 	base.content_height = 0;
 	for (size_t i = 0; i < private.widget_count; i++) {
@@ -56,11 +71,12 @@ static void resize(self) {
 
 	if (private.no_devices) {
 		MoveWindow(private.no_devices, 0, 0, base.width, base.height, true);
-		if (private.font) DeleteObject(private.font);
-		private.font = CreateFont(
-			Window_scale(wnd, 16), 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, L"Segoe UI");
-		SetWindowFont(private.no_devices, private.font, true);
 	}
+	load_assets(this, false);
+}
+
+static void dpi(self) {
+	load_assets(this, true);
 }
 
 static void created(self) {
