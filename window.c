@@ -17,13 +17,13 @@ WINUSERAPI UINT WINAPI GetDpiForSystem(VOID);
 #define self Window *this
 #define public (*this)
 
-int Window_scale(self, int s) {
-	return s * public.dpi / 96;
-}
+// int Window_scale(self, int s) {
+// 	return s * public.dpi / 96;
+// }
 
-int Window_unscale(self, int s) {
-	return s * 96 / public.dpi;
-}
+// int Window_unscale(self, int s) {
+// 	return s * 96 / public.dpi;
+// }
 
 void Window_update_scroll(self) {
 	SCROLLINFO si = {
@@ -275,18 +275,18 @@ void Window_init(self, Window *parent, wchar_t *title) {
 	public.dpi = GetDpiForWindow(hwnd);
 }
 
-void Window_show(self) {
-	ShowWindow(public.hwnd, SW_SHOWDEFAULT);
-}
+// void Window_show(self) {
+// 	ShowWindow(public.hwnd, SW_SHOWDEFAULT);
+// }
 
-void Window_rescale(self, int x, int y, int width, int height) {
-	RECT size;
-	GetWindowRect(public.hwnd, &size);
-	if (x != -1) size.left = Window_scale(this, x);
-	if (y != -1) size.top = Window_scale(this, y);
-
-	SetWindowPos(public.hwnd, NULL,
-		size.left, size.top,
-		Window_scale(this, width), Window_scale(this, height),
-		SWP_NOZORDER | SWP_NOACTIVATE);
-}
+// void Window_rescale(self, int x, int y, int width, int height) {
+// 	RECT size;
+// 	GetWindowRect(public.hwnd, &size);
+// 	if (x != -1) size.left = Window_scale(this, x);
+// 	if (y != -1) size.top = Window_scale(this, y);
+//
+// 	SetWindowPos(public.hwnd, NULL,
+// 		size.left, size.top,
+// 		Window_scale(this, width), Window_scale(this, height),
+// 		SWP_NOZORDER | SWP_NOACTIVATE);
+// }

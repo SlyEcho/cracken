@@ -107,6 +107,17 @@ pub extern "user32" fn SendMessageTimeoutW(
     uTimeout: UINT,
     lpdwResult: *DWORD_PTR,
 ) callconv(WINAPI) LRESULT;
+pub extern "user32" fn ShowWindow(hWnd: HWND, nCmdShow: i32) callconv(WINAPI) BOOL;
+pub extern "user32" fn GetWindowRect(hWnd: HWND, lpRect: *RECT) callconv(WINAPI) BOOL;
+pub extern "user32" fn SetWindowPos(
+    hWnd: HWND,
+    hWndInsertAfter: ?HWND,
+    x: i32,
+    y: i32,
+    cx: i32,
+    cy: i32,
+    uFlags: u32,
+) callconv(WINAPI) BOOL;
 
 pub fn getWindowFont(hwnd: HWND) !HFONT {
     var out: DWORD_PTR = undefined;
@@ -142,6 +153,9 @@ pub const DIGCF_ALLCLASSES = 0x00000004;
 pub const DIGCF_PROFILE = 0x00000008;
 pub const DIGCF_DEVICEINTERFACE = 0x00000010;
 pub const DIGCF_INTERFACEDEVICE = DIGCF_DEVICEINTERFACE;
+pub const SW_SHOWDEFAULT = 10;
+pub const SWP_NOZORDER = 0x0004;
+pub const SWP_NOACTIVATE = 0x0010;
 
 pub const CreateFileW = win32.kernel32.CreateFileW;
 pub const ReadFile = win32.kernel32.ReadFile;
