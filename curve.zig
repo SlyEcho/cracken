@@ -31,25 +31,25 @@ pub const Curve = extern struct {
 
 const presets = struct {
     const fan: [6:null]?*const Curve = .{
-        &Curve.fromSlice("Silent", &.{ 25, 25, 25, 25, 25, 25, 25, 25, 35, 45, 55, 75, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
-        &Curve.fromSlice("Performance", &.{ 50, 50, 50, 50, 50, 50, 50, 50, 60, 70, 80, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
-        &Curve.fromFixed(25),
-        &Curve.fromFixed(50),
-        &Curve.fromFixed(75),
-        &Curve.fromFixed(100),
+        &.fromSlice("Silent", &.{ 25, 25, 25, 25, 25, 25, 25, 25, 35, 45, 55, 75, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
+        &.fromSlice("Performance", &.{ 50, 50, 50, 50, 50, 50, 50, 50, 60, 70, 80, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
+        &.fromFixed(25),
+        &.fromFixed(50),
+        &.fromFixed(75),
+        &.fromFixed(100),
     };
 
     const pump: [6:null]?*const Curve = .{
-        &Curve.fromSlice("Silent", &.{ 60, 60, 60, 60, 60, 60, 60, 60, 70, 80, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
-        &Curve.fromSlice("Performance", &.{ 70, 70, 70, 70, 70, 70, 70, 70, 80, 85, 90, 95, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
-        &Curve.fromFixed(25),
-        &Curve.fromFixed(50),
-        &Curve.fromFixed(75),
-        &Curve.fromFixed(100),
+        &.fromSlice("Silent", &.{ 60, 60, 60, 60, 60, 60, 60, 60, 70, 80, 90, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
+        &.fromSlice("Performance", &.{ 70, 70, 70, 70, 70, 70, 70, 70, 80, 85, 90, 95, 100, 100, 100, 100, 100, 100, 100, 100, 100 }),
+        &.fromFixed(25),
+        &.fromFixed(50),
+        &.fromFixed(75),
+        &.fromFixed(100),
     };
 };
 
 comptime {
-    @export(presets.fan, .{ .name = "Curve_fan_presets", .linkage = .strong });
-    @export(presets.pump, .{ .name = "Curve_pump_presets", .linkage = .strong });
+    @export(&presets.fan, .{ .name = "Curve_fan_presets", .linkage = .strong });
+    @export(&presets.pump, .{ .name = "Curve_pump_presets", .linkage = .strong });
 }

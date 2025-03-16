@@ -126,5 +126,5 @@ pub fn layout(
 }
 
 comptime {
-    @export(layout, .{ .name = "Layout", .linkage = .strong });
+    @export(&layout, .{ .name = "Layout", .linkage = .strong });
 }

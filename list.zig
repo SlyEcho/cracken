@@ -48,10 +48,10 @@ pub fn set(b: *ContainerType, i: usize, data: ItemType) callconv(.C) void {
 }
 
 comptime {
-    @export(create, .{ .name = "List_create", .linkage = .strong });
-    @export(delete, .{ .name = "List_delete", .linkage = .strong });
-    @export(append, .{ .name = "List_append", .linkage = .strong });
-    @export(length, .{ .name = "List_length", .linkage = .strong });
-    @export(get, .{ .name = "List_get", .linkage = .strong });
-    @export(set, .{ .name = "List_set", .linkage = .strong });
+    @export(&create, .{ .name = "List_create", .linkage = .strong });
+    @export(&delete, .{ .name = "List_delete", .linkage = .strong });
+    @export(&append, .{ .name = "List_append", .linkage = .strong });
+    @export(&length, .{ .name = "List_length", .linkage = .strong });
+    @export(&get, .{ .name = "List_get", .linkage = .strong });
+    @export(&set, .{ .name = "List_set", .linkage = .strong });
 }

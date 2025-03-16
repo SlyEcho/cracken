@@ -123,11 +123,11 @@ pub fn getKrakens() callconv(.C) *List.ContainerType {
 }
 
 comptime {
-    @export(update, .{ .name = "Kraken_update", .linkage = .strong });
-    @export(getIdent, .{ .name = "Kraken_get_ident", .linkage = .strong });
-    @export(getInfo, .{ .name = "Kraken_get_info", .linkage = .strong });
-    @export(setPumpCurve, .{ .name = "Kraken_set_pump_curve", .linkage = .strong });
-    @export(setFanCurve, .{ .name = "Kraken_set_fan_curve", .linkage = .strong });
-    @export(deinit, .{ .name = "Kraken_delete", .linkage = .strong });
-    @export(getKrakens, .{ .name = "Kraken_get_krakens", .linkage = .strong });
+    @export(&update, .{ .name = "Kraken_update", .linkage = .strong });
+    @export(&getIdent, .{ .name = "Kraken_get_ident", .linkage = .strong });
+    @export(&getInfo, .{ .name = "Kraken_get_info", .linkage = .strong });
+    @export(&setPumpCurve, .{ .name = "Kraken_set_pump_curve", .linkage = .strong });
+    @export(&setFanCurve, .{ .name = "Kraken_set_fan_curve", .linkage = .strong });
+    @export(&deinit, .{ .name = "Kraken_delete", .linkage = .strong });
+    @export(&getKrakens, .{ .name = "Kraken_get_krakens", .linkage = .strong });
 }

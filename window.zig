@@ -67,8 +67,8 @@ pub const Window = extern struct {
 };
 
 comptime {
-    @export(Window.show, .{ .name = "Window_show", .linkage = .strong });
-    @export(Window.scale, .{ .name = "Window_scale", .linkage = .strong });
-    @export(Window.rescale, .{ .name = "Window_rescale", .linkage = .strong });
-    @export(Window.unscale, .{ .name = "Window_unscale", .linkage = .strong });
+    @export(&Window.show, .{ .name = "Window_show", .linkage = .strong });
+    @export(&Window.scale, .{ .name = "Window_scale", .linkage = .strong });
+    @export(&Window.rescale, .{ .name = "Window_rescale", .linkage = .strong });
+    @export(&Window.unscale, .{ .name = "Window_unscale", .linkage = .strong });
 }

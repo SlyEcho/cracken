@@ -11,6 +11,6 @@ fn xfree(p: [*]u8, size: usize) callconv(.C) void {
 }
 
 comptime {
-    @export(xmalloc, .{ .name = "xmalloc", .linkage = .strong });
-    @export(xfree, .{ .name = "xfree", .linkage = .strong });
+    @export(&xmalloc, .{ .name = "xmalloc", .linkage = .strong });
+    @export(&xfree, .{ .name = "xfree", .linkage = .strong });
 }

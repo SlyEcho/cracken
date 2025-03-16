@@ -3,9 +3,10 @@ const std = @import("std");
 pub fn build(b: *std.Build) !void {
     const mode = b.standardOptimizeOption(.{});
     const tgt = b.standardTargetOptions(.{
-        .default_target = try std.zig.CrossTarget.parse(.{
-            .arch_os_abi = "x86_64-windows-gnu",
-        }),
+        .default_target = .{
+            .cpu_arch = .x86_64,
+            .os_tag = .windows,
+        },
     });
 
     const exe = b.addExecutable(.{

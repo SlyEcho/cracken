@@ -7,5 +7,5 @@ pub var allocator: std.mem.Allocator = undefined;
 pub const is_debug = builtin.mode == .Debug;
 
 comptime {
-    @export(instance, .{ .name = "App_instance", .linkage = .strong });
+    @export(&instance, .{ .name = "App_instance", .linkage = .strong });
 }

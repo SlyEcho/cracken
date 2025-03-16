@@ -160,7 +160,7 @@ pub const SWP_NOACTIVATE = 0x0010;
 pub const CreateFileW = win32.kernel32.CreateFileW;
 pub const ReadFile = win32.kernel32.ReadFile;
 pub const WriteFile = win32.kernel32.WriteFile;
-pub const CloseHandle = win32.kernel32.CloseHandle;
+pub const CloseHandle = win32.CloseHandle;
 
 pub extern "setupapi" fn HidD_GetHidGuid(HidGuid: *GUID) callconv(WINAPI) void;
 pub extern "setupapi" fn SetupDiGetClassDevsW(
