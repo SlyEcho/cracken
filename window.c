@@ -25,23 +25,23 @@ WINUSERAPI UINT WINAPI GetDpiForSystem(VOID);
 // 	return s * 96 / public.dpi;
 // }
 
-void Window_update_scroll(self) {
-	SCROLLINFO si = {
-		.cbSize = sizeof(si),
-		.fMask = SIF_POS,
-	};
-	GetScrollInfo(public.hwnd, SB_VERT, &si);
-	si.fMask = SIF_RANGE | SIF_PAGE;
-	si.nMin = 0;
-	si.nMax = public.content_height;
-	si.nPage = public.height;
-	SetScrollInfo(public.hwnd, SB_VERT, &si, TRUE);
+// void Window_update_scroll(self) {
+// 	SCROLLINFO si = {
+// 		.cbSize = sizeof(si),
+// 		.fMask = SIF_POS,
+// 	};
+// 	GetScrollInfo(public.hwnd, SB_VERT, &si);
+// 	si.fMask = SIF_RANGE | SIF_PAGE;
+// 	si.nMin = 0;
+// 	si.nMax = public.content_height;
+// 	si.nPage = public.height;
+// 	SetScrollInfo(public.hwnd, SB_VERT, &si, TRUE);
 
-	if (si.nPos > 0 && si.nPos > public.content_height - public.height) {
-		ScrollWindow(public.hwnd, 0, si.nPos - (public.content_height - public.height), NULL, NULL);
-		si.nPos = public.content_height - public.height;
-	}
-}
+// 	if (si.nPos > 0 && si.nPos > public.content_height - public.height) {
+// 		ScrollWindow(public.hwnd, 0, si.nPos - (public.content_height - public.height), NULL, NULL);
+// 		si.nPos = public.content_height - public.height;
+// 	}
+// }
 
 static bool handle_resize(self, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {

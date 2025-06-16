@@ -195,3 +195,35 @@ pub extern "hid" fn HidD_GetSerialNumberString(
     Buffer: [*:0]u16,
     BufferLength: u32,
 ) callconv(WINAPI) BOOL;
+
+pub const SB_HORZ = 0;
+pub const SB_VERT = 1;
+pub const SB_CTL = 2;
+pub const SB_BOTH = 3;
+
+pub const SIF_RANGE = 0x0001;
+pub const SIF_PAGE = 0x0002;
+pub const SIF_POS = 0x0004;
+pub const SIF_DISABLENOSCROLL = 0x0008;
+pub const SIF_TRACKPOS = 0x0010;
+pub const SIF_ALL = (SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS);
+
+pub const SCROLLINFO = struct {
+    cbSize: UINT = @sizeOf(SCROLLINFO),
+    fMask: UINT = 0,
+    nMin: i32 = 0,
+    nMax: i32 = 0,
+    nPage: UINT = 0,
+    nPos: i32 = 0,
+    nTrackPos: i32 = 0,
+};
+
+pub extern "user32" fn GetScrollInfo(hwnd: HWND, nBar: i32, lpsi: *SCROLLINFO) callconv(WINAPI) BOOL;
+pub extern "user32" fn SetScrollInfo(hwnd: HWND, nBar: i32, lpsi: *const SCROLLINFO, redraw: BOOL) callconv(WINAPI) i32;
+pub extern "user32" fn ScrollWindow(
+    hWnd: HWND,
+    XAmount: i32,
+    YAmount: i32,
+    lpRect: ?*const RECT,
+    lpClipRect: ?*const RECT,
+) callconv(WINAPI) BOOL;

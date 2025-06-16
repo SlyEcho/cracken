@@ -64,6 +64,25 @@ pub const Window = extern struct {
             w.SWP_NOZORDER | w.SWP_NOACTIVATE,
         );
     }
+
+    fn update_scroll(self: *Self) callconv(.C) void {
+        var si: w.SCROLLINFO = .{
+            .cbSize = @sizeOf(w.SCROLLINFO),
+            .fMask = w.SIF_POS,
+        };
+
+        _ = w.GetScrollInfo(self.hwnd, w.SB_VERT, &si);
+        si.fMask = w.SIF_RANGE | w.SIF_PAGE;
+        si.nMin = 0;
+        si.nMax = self.content_height;
+        si.nPage = @intCast(self.height);
+        _ = w.SetScrollInfo(self.hwnd, w.SB_VERT, &si, w.TRUE);
+
+        if (si.nPos > 0 and si.nPos > self.content_height - self.height) {
+            _ = w.ScrollWindow(self.hwnd, 0, si.nPos - (self.content_height - self.height), null, null);
+            si.nPos = self.content_height - self.height;
+        }
+    }
 };
 
 comptime {
@@ -71,4 +90,5 @@ comptime {
     @export(&Window.scale, .{ .name = "Window_scale", .linkage = .strong });
     @export(&Window.rescale, .{ .name = "Window_rescale", .linkage = .strong });
     @export(&Window.unscale, .{ .name = "Window_unscale", .linkage = .strong });
+    @export(&Window.update_scroll, .{ .name = "Window_update_scroll", .linkage = .strong });
 }
