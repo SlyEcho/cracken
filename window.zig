@@ -66,10 +66,7 @@ pub const Window = extern struct {
     }
 
     fn update_scroll(self: *Self) callconv(.C) void {
-        var si: w.SCROLLINFO = .{
-            .cbSize = @sizeOf(w.SCROLLINFO),
-            .fMask = w.SIF_POS,
-        };
+        var si: w.SCROLLINFO = .{ .fMask = w.SIF_POS };
 
         _ = w.GetScrollInfo(self.hwnd, w.SB_VERT, &si);
         si.fMask = w.SIF_RANGE | w.SIF_PAGE;

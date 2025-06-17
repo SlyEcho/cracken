@@ -208,7 +208,7 @@ pub const SIF_DISABLENOSCROLL = 0x0008;
 pub const SIF_TRACKPOS = 0x0010;
 pub const SIF_ALL = (SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS);
 
-pub const SCROLLINFO = struct {
+pub const SCROLLINFO = extern struct {
     cbSize: UINT = @sizeOf(SCROLLINFO),
     fMask: UINT = 0,
     nMin: i32 = 0,
