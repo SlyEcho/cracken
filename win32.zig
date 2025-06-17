@@ -83,7 +83,7 @@ pub const SP_DEVICE_INTERFACE_DETAIL_DATA_W = extern struct {
     DevicePath: u16,
 };
 pub const HIDD_ATTRIBUTES = extern struct {
-    pub const SizeOf = 10;
+    pub const SizeOf = 12;
     Size: u32,
     VendorID: u16,
     ProductID: u16,

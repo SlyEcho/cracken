@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) !void {
         "window.c",
     };
 
-    exe.addCSourceFiles(.{ .files = &sources, .flags = &flags });
+    mod.addCSourceFiles(.{ .files = &sources, .flags = &flags });
 
     exe.linkLibC();
     exe.linkSystemLibrary("setupapi");
@@ -53,4 +53,19 @@ pub fn build(b: *std.Build) !void {
     });
     const check_step = b.step("check", "Check compiler");
     check_step.dependOn(&check_exe.step);
+
+    const test_step = b.step("test", "Test");
+    const test_cflags = flags ++ .{ "-DZIGTEST" };
+    const test_archs: []const std.Target.Cpu.Arch = &.{ .x86, .x86_64 };
+    for (test_archs) |a| {
+        const test_exe = b.addTest(.{
+            .target = b.resolveTargetQuery(.{ .cpu_arch = a, .os_tag = .windows }),
+            .root_source_file = b.path("abi_test.zig"),
+        });
+        test_exe.addCSourceFiles(.{.files = &.{"abi_test.c"}, .flags =  &test_cflags});
+        test_exe.addIncludePath(b.path("."));
+        test_exe.linkLibC();
+        const run_test = b.addRunArtifact(test_exe);
+        test_step.dependOn(&run_test.step);
+    }
 }
