@@ -49,7 +49,7 @@ pub fn getDevice(self: *Self) ?*HidDevice {
     const detailDataBuf = allocator.alignedAlloc(u8, @alignOf(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W), detailDataSize) catch return null;
 
     var detailData = @as(*w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, @ptrCast(detailDataBuf.ptr));
-    detailData.cbSize = w.SP_DEVICE_INTERFACE_DETAIL_DATA_W.SizeOf;
+    detailData.* = .{};
     if (w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, detailData, detailDataSize, &detailDataSize, null) == w.FALSE) {
         return null;
     }
@@ -60,8 +60,7 @@ pub fn getDevice(self: *Self) ?*HidDevice {
         return null;
     }
     defer _ = w.CloseHandle(file);
-    var attributes = std.mem.zeroes(w.HIDD_ATTRIBUTES);
-    attributes.Size = w.HIDD_ATTRIBUTES.SizeOf;
+    var attributes = w.HIDD_ATTRIBUTES{};
     if (w.HidD_GetAttributes(file, &attributes) == 0) {
         return null;
     }

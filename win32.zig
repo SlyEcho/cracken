@@ -78,16 +78,14 @@ pub const SP_DEVICE_INTERFACE_DATA = extern struct {
     Reserved: usize,
 };
 pub const SP_DEVICE_INTERFACE_DETAIL_DATA_W = extern struct {
-    pub const SizeOf = if (builtin.cpu.arch == .x86) 6 else 8;
-    cbSize: u32,
-    DevicePath: u16,
+    cbSize: u32 = if (builtin.cpu.arch == .x86) 6 else 8,
+    DevicePath: u16 = 0,
 };
 pub const HIDD_ATTRIBUTES = extern struct {
-    pub const SizeOf = 12;
-    Size: u32,
-    VendorID: u16,
-    ProductID: u16,
-    VersionNumber: u16,
+    cbSize: u32 = 12,
+    VendorID: u16 = 0,
+    ProductID: u16 = 0,
+    VersionNumber: u16 = 0,
 };
 
 pub extern "kernel32" fn GetModuleHandleW(lpModuleName: ?PCWSTR) callconv(WINAPI) HMODULE;

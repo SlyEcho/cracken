@@ -5,3 +5,6 @@ zig-cache/
 zig-out/
 .cache/
 .zig-cache/
+*.obj
+*.o
+*.exe

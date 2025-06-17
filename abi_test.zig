@@ -8,11 +8,11 @@ const c = struct {
 };
 
 test "HIDD_ATTRIBUTES" {
-    try std.testing.expectEqual(c.SIZEOF_HIDD_ATTRIBUTES, w.HIDD_ATTRIBUTES.SizeOf);
+    try std.testing.expectEqual(c.SIZEOF_HIDD_ATTRIBUTES, (w.HIDD_ATTRIBUTES{}).cbSize);
 }
 
 test "SIZEOF_SP_DEVICE_INTERFACE_DETAIL_DATA_W" {
-    try std.testing.expectEqual(c.SIZEOF_SP_DEVICE_INTERFACE_DETAIL_DATA_W, w.SP_DEVICE_INTERFACE_DETAIL_DATA_W.SizeOf);
+    try std.testing.expectEqual(c.SIZEOF_SP_DEVICE_INTERFACE_DETAIL_DATA_W, (w.SP_DEVICE_INTERFACE_DETAIL_DATA_W{}).cbSize);
 }
 
 test "SCROLLINFO" {

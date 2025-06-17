@@ -6,7 +6,8 @@
 #define GENERATE \
     X(HIDD_ATTRIBUTES) \
     X(SCROLLINFO) \
-    X(SP_DEVICE_INTERFACE_DETAIL_DATA_W)
+    X(SP_DEVICE_INTERFACE_DETAIL_DATA_W) \
+    ;
 
 #define X(N) const size_t SIZEOF_ ## N = sizeof(N);
 GENERATE
@@ -16,6 +17,7 @@ GENERATE
 #include <stdio.h>
 
 int main() {
+    printf("Host system: %d-bit\n", (int)(sizeof(size_t)*8));
     #define X(N) printf("sizeof(%s) = %zu\n", #N, sizeof(N));
     GENERATE
     #undef X
