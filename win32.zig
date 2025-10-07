@@ -2,7 +2,6 @@ const builtin = @import("builtin");
 const std = @import("std");
 const win32 = std.os.windows;
 
-pub const WINAPI = win32.WINAPI;
 pub const HINSTANCE = win32.HINSTANCE;
 pub const HMODULE = win32.HMODULE;
 pub const RECT = win32.RECT;
@@ -88,14 +87,14 @@ pub const HIDD_ATTRIBUTES = extern struct {
     VersionNumber: u16 = 0,
 };
 
-pub extern "kernel32" fn GetModuleHandleW(lpModuleName: ?PCWSTR) callconv(WINAPI) HMODULE;
-pub extern "comctl32" fn InitCommonControls() callconv(WINAPI) void;
-pub extern "gdi32" fn GetTextExtentPoint32W(hdc: HDC, lpString: PWSTR, c: c_int, psize: *SIZE) callconv(WINAPI) BOOL;
-pub extern "gdi32" fn GetTextMetricsW(hdc: HDC, lptm: *TEXTMETRICW) callconv(WINAPI) BOOL;
-pub extern "gdi32" fn SelectObject(hdc: HDC, h: HGDIOBJ) callconv(WINAPI) HGDIOBJ;
-pub extern "user32" fn GetWindowTextW(hWnd: HWND, lpString: PWSTR, nMaxCount: c_int) callconv(WINAPI) c_int;
-pub extern "user32" fn GetWindowTextLengthW(hWnd: HWND) callconv(WINAPI) c_int;
-pub extern "user32" fn MoveWindow(hWnd: HWND, X: c_int, Y: c_int, nWidth: c_int, nHeight: c_int, bRepaint: BOOL) callconv(WINAPI) BOOL;
+pub extern "kernel32" fn GetModuleHandleW(lpModuleName: ?PCWSTR) callconv(.winapi) HMODULE;
+pub extern "comctl32" fn InitCommonControls() callconv(.winapi) void;
+pub extern "gdi32" fn GetTextExtentPoint32W(hdc: HDC, lpString: PWSTR, c: c_int, psize: *SIZE) callconv(.winapi) BOOL;
+pub extern "gdi32" fn GetTextMetricsW(hdc: HDC, lptm: *TEXTMETRICW) callconv(.winapi) BOOL;
+pub extern "gdi32" fn SelectObject(hdc: HDC, h: HGDIOBJ) callconv(.winapi) HGDIOBJ;
+pub extern "user32" fn GetWindowTextW(hWnd: HWND, lpString: PWSTR, nMaxCount: c_int) callconv(.winapi) c_int;
+pub extern "user32" fn GetWindowTextLengthW(hWnd: HWND) callconv(.winapi) c_int;
+pub extern "user32" fn MoveWindow(hWnd: HWND, X: c_int, Y: c_int, nWidth: c_int, nHeight: c_int, bRepaint: BOOL) callconv(.winapi) BOOL;
 pub extern "user32" fn SendMessageTimeoutW(
     hWnd: HWND,
     Msg: UINT,
@@ -104,9 +103,9 @@ pub extern "user32" fn SendMessageTimeoutW(
     fuFlags: UINT,
     uTimeout: UINT,
     lpdwResult: *DWORD_PTR,
-) callconv(WINAPI) LRESULT;
-pub extern "user32" fn ShowWindow(hWnd: HWND, nCmdShow: i32) callconv(WINAPI) BOOL;
-pub extern "user32" fn GetWindowRect(hWnd: HWND, lpRect: *RECT) callconv(WINAPI) BOOL;
+) callconv(.winapi) LRESULT;
+pub extern "user32" fn ShowWindow(hWnd: HWND, nCmdShow: i32) callconv(.winapi) BOOL;
+pub extern "user32" fn GetWindowRect(hWnd: HWND, lpRect: *RECT) callconv(.winapi) BOOL;
 pub extern "user32" fn SetWindowPos(
     hWnd: HWND,
     hWndInsertAfter: ?HWND,
@@ -115,7 +114,7 @@ pub extern "user32" fn SetWindowPos(
     cx: i32,
     cy: i32,
     uFlags: u32,
-) callconv(WINAPI) BOOL;
+) callconv(.winapi) BOOL;
 
 pub fn getWindowFont(hwnd: HWND) !HFONT {
     var out: DWORD_PTR = undefined;
@@ -129,9 +128,9 @@ pub fn getWindowFont(hwnd: HWND) !HFONT {
     return @as(HFONT, @ptrFromInt(@as(usize, @bitCast(out))));
 }
 
-pub extern "user32" fn GetMessageW(lpMsg: *MSG, hWnd: ?HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT) callconv(WINAPI) BOOL;
-pub extern "user32" fn TranslateMessage(lpMsg: *const MSG) callconv(WINAPI) BOOL;
-pub extern "user32" fn DispatchMessageW(lpMsg: *const MSG) callconv(WINAPI) LRESULT;
+pub extern "user32" fn GetMessageW(lpMsg: *MSG, hWnd: ?HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT) callconv(.winapi) BOOL;
+pub extern "user32" fn TranslateMessage(lpMsg: *const MSG) callconv(.winapi) BOOL;
+pub extern "user32" fn DispatchMessageW(lpMsg: *const MSG) callconv(.winapi) LRESULT;
 
 pub const GENERIC_READ = 0x80000000;
 pub const GENERIC_WRITE = 0x40000000;
@@ -160,21 +159,21 @@ pub const ReadFile = win32.kernel32.ReadFile;
 pub const WriteFile = win32.kernel32.WriteFile;
 pub const CloseHandle = win32.CloseHandle;
 
-pub extern "setupapi" fn HidD_GetHidGuid(HidGuid: *GUID) callconv(WINAPI) void;
+pub extern "setupapi" fn HidD_GetHidGuid(HidGuid: *GUID) callconv(.winapi) void;
 pub extern "setupapi" fn SetupDiGetClassDevsW(
     ClassGuid: *const GUID,
     Enumerator: [*c]const u16,
     hwndParent: ?HWND,
     Flags: u32,
-) callconv(WINAPI) HDEVINFO;
-pub extern "setupapi" fn SetupDiDestroyDeviceInfoList(DeviceInfoSet: HDEVINFO) callconv(WINAPI) BOOL;
+) callconv(.winapi) HDEVINFO;
+pub extern "setupapi" fn SetupDiDestroyDeviceInfoList(DeviceInfoSet: HDEVINFO) callconv(.winapi) BOOL;
 pub extern "setupapi" fn SetupDiEnumDeviceInterfaces(
     DeviceInfoSet: HDEVINFO,
     DeviceInfoData: ?*SP_DEVINFO_DATA,
     InterfaceClassGuid: *const GUID,
     MemberIndex: u32,
     DeviceInterfaceDat: *SP_DEVICE_INTERFACE_DATA,
-) callconv(WINAPI) BOOL;
+) callconv(.winapi) BOOL;
 pub extern "setupapi" fn SetupDiGetDeviceInterfaceDetailW(
     DeviceInfoSet: HDEVINFO,
     DeviceInterfaceData: *SP_DEVICE_INTERFACE_DATA,
@@ -182,17 +181,17 @@ pub extern "setupapi" fn SetupDiGetDeviceInterfaceDetailW(
     DeviceInterfaceDetailDataSize: u32,
     RequiredSize: *u32,
     DeviceInfoData: ?*SP_DEVINFO_DATA,
-) callconv(WINAPI) BOOL;
+) callconv(.winapi) BOOL;
 
 pub extern "hid" fn HidD_GetAttributes(
     HidDeviceObject: HANDLE,
     Attributes: *HIDD_ATTRIBUTES,
-) callconv(WINAPI) BOOL;
+) callconv(.winapi) BOOL;
 pub extern "hid" fn HidD_GetSerialNumberString(
     HidDeviceObject: HANDLE,
     Buffer: [*:0]u16,
     BufferLength: u32,
-) callconv(WINAPI) BOOL;
+) callconv(.winapi) BOOL;
 
 pub const SB_HORZ = 0;
 pub const SB_VERT = 1;
@@ -216,12 +215,12 @@ pub const SCROLLINFO = extern struct {
     nTrackPos: i32 = 0,
 };
 
-pub extern "user32" fn GetScrollInfo(hwnd: HWND, nBar: i32, lpsi: *SCROLLINFO) callconv(WINAPI) BOOL;
-pub extern "user32" fn SetScrollInfo(hwnd: HWND, nBar: i32, lpsi: *const SCROLLINFO, redraw: BOOL) callconv(WINAPI) i32;
+pub extern "user32" fn GetScrollInfo(hwnd: HWND, nBar: i32, lpsi: *SCROLLINFO) callconv(.winapi) BOOL;
+pub extern "user32" fn SetScrollInfo(hwnd: HWND, nBar: i32, lpsi: *const SCROLLINFO, redraw: BOOL) callconv(.winapi) i32;
 pub extern "user32" fn ScrollWindow(
     hWnd: HWND,
     XAmount: i32,
     YAmount: i32,
     lpRect: ?*const RECT,
     lpClipRect: ?*const RECT,
-) callconv(WINAPI) BOOL;
+) callconv(.winapi) BOOL;

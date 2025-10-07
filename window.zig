@@ -5,9 +5,9 @@ const w = @import("win32.zig");
 pub const Window = extern struct {
     const Self = @This();
 
-    const FnWindow = *const fn (w: *Window) callconv(.C) void;
-    const FnWindowCmd = *const fn (w: *Window, id: i32) callconv(.C) void;
-    const FnWindowColor = *const fn (w: *Window, hdc: w.HDC, ctrl: w.HWND) callconv(.C) w.HANDLE;
+    const FnWindow = *const fn (w: *Window) callconv(.c) void;
+    const FnWindowCmd = *const fn (w: *Window, id: i32) callconv(.c) void;
+    const FnWindowColor = *const fn (w: *Window, hdc: w.HDC, ctrl: w.HWND) callconv(.c) w.HANDLE;
 
     const WindowClass = extern struct {
         name: [*c]const u16,
@@ -35,19 +35,19 @@ pub const Window = extern struct {
     dpi: i32,
     content_height: i32,
 
-    fn scale(self: *Self, s: i32) callconv(.C) i32 {
+    fn scale(self: *Self, s: i32) callconv(.c) i32 {
         return s * @divFloor(self.dpi, 96);
     }
 
-    fn unscale(self: *Self, s: i32) callconv(.C) i32 {
+    fn unscale(self: *Self, s: i32) callconv(.c) i32 {
         return s * @divFloor(96, self.dpi);
     }
 
-    fn show(self: *Self) callconv(.C) void {
+    fn show(self: *Self) callconv(.c) void {
         _ = w.ShowWindow(self.hwnd, w.SW_SHOWDEFAULT);
     }
 
-    fn rescale(self: *Self, x: i32, y: i32, width: i32, height: i32) callconv(.C) void {
+    fn rescale(self: *Self, x: i32, y: i32, width: i32, height: i32) callconv(.c) void {
         var size: w.RECT = undefined;
         if (w.GetWindowRect(self.hwnd, &size) == w.FALSE) return;
 
@@ -65,7 +65,7 @@ pub const Window = extern struct {
         );
     }
 
-    fn update_scroll(self: *Self) callconv(.C) void {
+    fn update_scroll(self: *Self) callconv(.c) void {
         var si: w.SCROLLINFO = .{ .fMask = w.SIF_POS };
 
         _ = w.GetScrollInfo(self.hwnd, w.SB_VERT, &si);

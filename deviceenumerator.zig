@@ -46,7 +46,7 @@ pub fn getDevice(self: *Self) ?*HidDevice {
     var detailDataSize: u32 = 0;
     _ = w.SetupDiGetDeviceInterfaceDetailW(self.handle, &self.interfaceData, null, detailDataSize, &detailDataSize, null);
 
-    const detailDataBuf = allocator.alignedAlloc(u8, @alignOf(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W), detailDataSize) catch return null;
+    const detailDataBuf = allocator.alignedAlloc(u8, .of(w.SP_DEVICE_INTERFACE_DETAIL_DATA_W), detailDataSize) catch return null;
 
     var detailData = @as(*w.SP_DEVICE_INTERFACE_DETAIL_DATA_W, @ptrCast(detailDataBuf.ptr));
     detailData.* = .{};

@@ -2,10 +2,10 @@ const std = @import("std");
 const app = @import("app.zig");
 
 const ItemType = ?*anyopaque;
-const fn_delete = *const fn (ItemType) callconv(.C) void;
+const fn_delete = *const fn (ItemType) callconv(.c) void;
 pub const ContainerType = std.ArrayList(ItemType);
 
-pub fn create(capacity: usize) callconv(.C) *ContainerType {
+pub fn create(capacity: usize) callconv(.c) *ContainerType {
     const b = app.allocator.create(ContainerType) catch {
         unreachable;
     };
@@ -17,7 +17,7 @@ pub fn create(capacity: usize) callconv(.C) *ContainerType {
     return b;
 }
 
-pub fn delete(b: *ContainerType, deleter: ?fn_delete) callconv(.C) void {
+pub fn delete(b: *ContainerType, deleter: ?fn_delete) callconv(.c) void {
     if (deleter) |del| {
         for (b.items) |i| {
             if (i != null) {
@@ -25,25 +25,25 @@ pub fn delete(b: *ContainerType, deleter: ?fn_delete) callconv(.C) void {
             }
         }
     }
-    b.deinit();
+    b.deinit(app.allocator);
     app.allocator.destroy(b);
 }
 
-pub fn append(b: *ContainerType, data: ItemType) callconv(.C) void {
-    b.append(data) catch {
+pub fn append(b: *ContainerType, data: ItemType) callconv(.c) void {
+    b.append(app.allocator, data) catch {
         unreachable;
     };
 }
 
-pub fn length(b: *const ContainerType) callconv(.C) usize {
+pub fn length(b: *const ContainerType) callconv(.c) usize {
     return b.items.len;
 }
 
-pub fn get(b: *const ContainerType, i: usize) callconv(.C) ItemType {
+pub fn get(b: *const ContainerType, i: usize) callconv(.c) ItemType {
     return b.items[i];
 }
 
-pub fn set(b: *ContainerType, i: usize, data: ItemType) callconv(.C) void {
+pub fn set(b: *ContainerType, i: usize, data: ItemType) callconv(.c) void {
     b.items[i] = data;
 }
 

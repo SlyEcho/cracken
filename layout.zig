@@ -20,7 +20,7 @@ pub fn layout(
     ncol: u32,
     cells: [*]*LayoutCell,
     margin: i32,
-) callconv(.C) void {
+) callconv(.c) void {
     var buffer: [4096]u8 = undefined;
     var fba = std.heap.FixedBufferAllocator.init(&buffer);
     const allocator = fba.allocator();

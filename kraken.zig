@@ -23,7 +23,7 @@ info: DeviceInfo,
 pub fn init(device: *HidDevice) *Kraken {
     var this = app.allocator.create(Kraken) catch unreachable;
 
-    const ident = std.fmt.allocPrintZ(app.allocator, "X52 ({})", .{std.unicode.fmtUtf16Le(device.serial)}) catch unreachable;
+    const ident = std.fmt.allocPrint(app.allocator, "X52 ({f})", .{std.unicode.fmtUtf16Le(device.serial)}) catch unreachable;
     defer app.allocator.free(ident);
     this.ident = std.unicode.utf8ToUtf16LeAllocZ(app.allocator, ident) catch unreachable;
     this.device = device;
@@ -62,7 +62,7 @@ pub fn control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels: []cons
     }
 }
 
-pub fn update(this: *Kraken) callconv(.C) void {
+pub fn update(this: *Kraken) callconv(.c) void {
     var packet: [65]u8 = undefined;
     var num: u32 = undefined;
     if (win32.ReadFile(this.*.reader, @ptrCast(&packet), packet.len, &num, null) != 0) {
@@ -72,27 +72,27 @@ pub fn update(this: *Kraken) callconv(.C) void {
     }
 }
 
-pub fn getIdent(this: *const Kraken) callconv(.C) [*:0]const u16 {
+pub fn getIdent(this: *const Kraken) callconv(.c) [*:0]const u16 {
     return @ptrCast(&this.ident[0]);
 }
 
-pub fn getInfo(this: *const Kraken) callconv(.C) ?*const DeviceInfo {
+pub fn getInfo(this: *const Kraken) callconv(.c) ?*const DeviceInfo {
     return &this.info;
 }
 
 const Curve = curves.Curve;
 
-pub fn setPumpCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
+pub fn setPumpCurve(this: *Kraken, curve: *const Curve) callconv(.c) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
     control(this, curve.length > 1, .PUMP, curve.toSlice(), interval);
 }
 
-pub fn setFanCurve(this: *Kraken, curve: *const Curve) callconv(.C) void {
+pub fn setFanCurve(this: *Kraken, curve: *const Curve) callconv(.c) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
     control(this, curve.length > 1, .FAN, curve.toSlice(), interval);
 }
 
-pub fn deinit(this: *Kraken) callconv(.C) void {
+pub fn deinit(this: *Kraken) callconv(.c) void {
     _ = win32.CloseHandle(this.reader);
     if (this.writer != null) {
         _ = win32.CloseHandle(this.writer.?);
@@ -102,7 +102,7 @@ pub fn deinit(this: *Kraken) callconv(.C) void {
     app.allocator.destroy(this);
 }
 
-pub fn getKrakens() callconv(.C) *List.ContainerType {
+pub fn getKrakens() callconv(.c) *List.ContainerType {
     var denu = DeviceEnumerator.init();
     defer denu.deinit();
 

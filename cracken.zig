@@ -7,8 +7,8 @@ const window = @import("window.zig");
 const xalloc = @import("xalloc.zig");
 
 const Window = opaque {};
-extern fn MainWindow_create() callconv(.C) *Window;
-extern fn Window_show(window: *Window) callconv(.C) void;
+extern fn MainWindow_create() callconv(.c) *Window;
+extern fn Window_show(window: *Window) callconv(.c) void;
 
 pub fn main() !void {
     _ = kraken;
