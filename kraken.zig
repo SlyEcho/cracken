@@ -54,7 +54,13 @@ const FanOrPump = enum(u1) {
 };
 
 pub fn control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels: []const u8, interval: u32) void {
-    if (this.mock) return;
+    if (this.mock) {
+        std.debug.print(
+            "contol, isSave: {any}, fanOrPump: {any}, levels: {any}\n",
+            .{ isSave, fanOrpump, levels },
+        );
+        return;
+    }
 
     if (this.writer == null) {
         this.writer = win32.CreateFileW(this.device.path, win32.GENERIC_WRITE, win32.FILE_SHARE_READ | win32.FILE_SHARE_WRITE, null, win32.OPEN_EXISTING, 0, null);

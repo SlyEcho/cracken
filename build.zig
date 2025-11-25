@@ -29,7 +29,6 @@ pub fn build(b: *std.Build) !void {
     const sources = .{
         "krakenwidget.c",
         "mainwindow.c",
-        "window.c",
     };
 
     mod.addCSourceFiles(.{ .files = &sources, .flags = &flags });
@@ -62,7 +61,7 @@ pub fn build(b: *std.Build) !void {
             .aarch64 => break :b &.{ .x86, .x86_64, .aarch64 },
             .x86_64 => break :b &.{ .x86, .x86_64 },
             .x86 => break :b &.{.x86},
-            else => unreachable,
+            else => break :b &.{},
         }
     };
 

@@ -6,7 +6,7 @@
 struct s_Window;
 
 typedef void (*fn_window)(struct s_Window *);
-typedef int (*fn_window_command)(struct s_Window *, int id);
+typedef bool (*fn_window_command)(struct s_Window *, int id);
 typedef HBRUSH (*fn_window_static_color)(struct s_Window *, HDC hdc, HWND ctrl);
 
 typedef struct s_WindowClass {

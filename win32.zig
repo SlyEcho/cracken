@@ -26,6 +26,12 @@ pub const GUID = win32.GUID;
 pub const HANDLE = win32.HANDLE;
 pub const INVALID_HANDLE_VALUE = @as(HANDLE, @ptrFromInt(@as(usize, @bitCast(@as(isize, -1)))));
 pub const HDEVINFO = *opaque {};
+pub const HBRUSH = *opaque {};
+pub const HMENU = *opaque {};
+pub const HICON = *opaque {};
+pub const HCURSOR = *opaque {};
+pub const ATOM = win32.WORD;
+pub const LONG_PTR = win32.LONG_PTR;
 
 pub const POINT = extern struct {
     x: LONG,
@@ -40,6 +46,37 @@ pub const MSG = extern struct {
     pt: POINT,
     lPrivate: DWORD,
 };
+
+pub const WNDPROC = *const fn (hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM) callconv(.winapi) LRESULT;
+
+pub const WNDCLASSW = extern struct {
+    style: UINT,
+    lpfnWndProc: WNDPROC,
+    cbClsExtra: c_int = 0,
+    cbWndExtra: c_int = 0,
+    hInstance: HINSTANCE,
+    hIcon: ?HICON,
+    hCursor: ?HCURSOR,
+    hbrBackground: ?HBRUSH,
+    lpszMenuName: ?PCWSTR,
+    lpszClassName: PCWSTR,
+};
+
+pub const CREATESTRUCTW = extern struct {
+    lpCreateParams: ?*anyopaque,
+    hInstance: HINSTANCE,
+    hMenu: ?HMENU,
+    hwndParent: ?HWND,
+    cy: c_int,
+    cx: c_int,
+    y: c_int,
+    x: c_int,
+    style: LONG,
+    lpszName: ?PCWSTR,
+    lpszClass: ?PCWSTR,
+    dwExStyle: DWORD,
+};
+
 pub const HFONT = *opaque {};
 pub const SIZE = extern struct { cx: LONG, cy: LONG };
 pub const TEXTMETRICW = extern struct {
@@ -116,6 +153,31 @@ pub extern "user32" fn SetWindowPos(
     uFlags: u32,
 ) callconv(.winapi) BOOL;
 
+pub extern "user32" fn GetDpiForWindow(hwnd: HWND) callconv(.winapi) UINT;
+pub extern "user32" fn GetDpiForSystem() callconv(.winapi) UINT;
+pub extern "user32" fn SystemParametersInfoW(uiAction: UINT, uiParam: UINT, pvParam: ?*anyopaque, fWinIni: UINT) callconv(.winapi) BOOL;
+pub extern "user32" fn SendMessageW(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM) callconv(.winapi) LRESULT;
+pub extern "user32" fn DefWindowProcW(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM) callconv(.winapi) LRESULT;
+pub extern "user32" fn SetWindowLongPtrW(hWnd: HWND, nIndex: c_int, dwNewLong: LONG_PTR) callconv(.winapi) LONG_PTR;
+pub extern "user32" fn GetWindowLongPtrW(hWnd: HWND, nIndex: c_int) callconv(.winapi) LONG_PTR;
+pub extern "user32" fn LoadCursorW(hInstance: ?HINSTANCE, lpCursorName: ?PCWSTR) callconv(.winapi) HCURSOR;
+pub extern "user32" fn RegisterClassW(lpWndClass: *const WNDCLASSW) callconv(.winapi) ATOM;
+pub extern "user32" fn CreateWindowExW(
+    dwExStyle: DWORD,
+    lpClassName: PCWSTR,
+    lpWindowName: ?PCWSTR,
+    dwStyle: DWORD,
+    X: c_int,
+    Y: c_int,
+    nWidth: c_int,
+    nHeight: c_int,
+    hWndParent: ?HWND,
+    hMenu: ?HMENU,
+    hInstance: ?HINSTANCE,
+    lpParam: ?*anyopaque,
+) callconv(.winapi) HWND;
+pub extern "user32" fn GetClientRect(hWnd: HWND, lpRect: *RECT) callconv(.winapi) BOOL;
+
 pub fn getWindowFont(hwnd: HWND) !HFONT {
     var out: DWORD_PTR = undefined;
     const WM_GETFONT = 0x0031;
@@ -153,6 +215,43 @@ pub const DIGCF_INTERFACEDEVICE = DIGCF_DEVICEINTERFACE;
 pub const SW_SHOWDEFAULT = 10;
 pub const SWP_NOZORDER = 0x0004;
 pub const SWP_NOACTIVATE = 0x0010;
+
+pub const WM_CREATE = 0x0001;
+pub const WM_DESTROY = 0x0002;
+pub const WM_SIZE = 0x0005;
+pub const WM_PAINT = 0x000F;
+pub const WM_COMMAND = 0x0111;
+pub const WM_TIMER = 0x0113;
+pub const WM_VSCROLL = 0x0115;
+pub const WM_MOUSEWHEEL = 0x020A;
+pub const WM_DPICHANGED = 0x02E0;
+pub const WM_DPICHANGED_BEFOREPARENT = 0x02E2;
+pub const WM_CTLCOLORSTATIC = 0x0138;
+
+pub const WS_VSCROLL = 0x00200000;
+
+pub const SPI_GETWHEELSCROLLLINES = 0x0068;
+pub const WHEEL_DELTA = 120;
+
+pub const SB_LINEUP = 0;
+pub const SB_LINEDOWN = 1;
+pub const SB_PAGEUP = 2;
+pub const SB_PAGEDOWN = 3;
+pub const SB_THUMBTRACK = 5;
+pub const SB_TOP = 6;
+pub const SB_BOTTOM = 7;
+
+pub const BN_CLICKED = 0;
+pub const CBN_SELCHANGE = 1;
+
+pub const GWLP_USERDATA = -21;
+
+pub const CS_VREDRAW = 0x0001;
+pub const CS_HREDRAW = 0x0002;
+
+pub const CW_USEDEFAULT = @as(c_int, @bitCast(@as(c_uint, 0x80000000)));
+
+pub const IDC_ARROW: [*:0]const u16 = @ptrFromInt(32512);
 
 pub const CreateFileW = win32.kernel32.CreateFileW;
 pub const ReadFile = win32.kernel32.ReadFile;
@@ -224,3 +323,19 @@ pub extern "user32" fn ScrollWindow(
     lpRect: ?*const RECT,
     lpClipRect: ?*const RECT,
 ) callconv(.winapi) BOOL;
+
+pub fn LOWORD(l: anytype) u16 {
+    return @truncate(@as(usize, @bitCast(l)) & 0xffff);
+}
+
+pub fn HIWORD(l: anytype) u16 {
+    return @truncate((@as(usize, @bitCast(l)) >> 16) & 0xffff);
+}
+
+pub fn GET_WHEEL_DELTA_WPARAM(wParam: WPARAM) i16 {
+    return @bitCast(@as(u16, @truncate((wParam >> 16) & 0xffff)));
+}
+
+pub fn MAKELONG(a: u16, b: u16) u32 {
+    return @as(u32, a) | (@as(u32, b) << 16);
+}

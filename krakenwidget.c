@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
@@ -45,7 +46,7 @@ typedef struct {
 void KrakenWidget_update(self) {
 	Kraken *k = public.kraken;
 	wchar_t buffer[20];
-	
+
 	DeviceInfo *info = Kraken_get_info(k);
 	if (info == NULL) return;
 
@@ -80,7 +81,7 @@ static void position(self) {
 		&c_lab_Fan,    &c_val_Fan,
 		&c_lab_Pump,   &c_val_Pump,
 	};
-	
+
 	HDC hdc = GetDC(base.hwnd);
 	Layout(hdc, 0, 0, 4, 2, cells, Window_scale(wnd, 5));
 
@@ -151,7 +152,7 @@ static void dpi(self) {
 	load_assets(this, true);
 }
 
-static int selected(self, int command) {
+static bool selected(self, int command) {
 
 	if (command == ID_PUMP) {
 		int i = ComboBox_GetCurSel(private.pump);
@@ -160,7 +161,7 @@ static int selected(self, int command) {
 			const Curve *c = Curve_pump_presets[i];
 			Kraken_set_pump_curve(public.kraken, c);
 		}
-		return 0;
+		return true;
 	}
 
 	if (command == ID_FAN) {
@@ -170,10 +171,10 @@ static int selected(self, int command) {
 			const Curve *c = Curve_fan_presets[i];
 			Kraken_set_fan_curve(public.kraken, c);
 		}
-		return 0;
+		return true;
 	}
 
-	return 1;
+	return false;
 }
 
 static WindowClass class = {
@@ -202,11 +203,11 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 
 	private.pump = MAKE_DROPDOWN(ID_PUMP);
 	private.fan = MAKE_DROPDOWN(ID_FAN);
-    
+
 	for (int i = 0; Curve_pump_presets[i]; i++) {
 		ComboBox_AddString(private.pump, Curve_pump_presets[i]->name);
     }
-    
+
 	for (int i = 0; Curve_fan_presets[i]; i++) {
 		ComboBox_AddString(private.fan, Curve_fan_presets[i]->name);
     }
@@ -227,4 +228,3 @@ KrakenWidget *KrakenWidget_create(Window *parent, Kraken *kraken) {
 
 	return this;
 }
-
