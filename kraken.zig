@@ -19,6 +19,7 @@ reader: win32.HANDLE,
 writer: ?win32.HANDLE,
 ident: [:0]u16,
 info: DeviceInfo,
+mock: bool,
 
 pub fn init(device: *HidDevice) *Kraken {
     var this = app.allocator.create(Kraken) catch unreachable;
@@ -27,8 +28,23 @@ pub fn init(device: *HidDevice) *Kraken {
     defer app.allocator.free(ident);
     this.ident = std.unicode.utf8ToUtf16LeAllocZ(app.allocator, ident) catch unreachable;
     this.device = device;
-    this.reader = win32.CreateFileW(device.path, win32.GENERIC_READ, win32.FILE_SHARE_READ | win32.FILE_SHARE_WRITE, null, win32.OPEN_EXISTING, 0, null);
-    this.writer = null;
+
+    if (app.is_debug and device.vendor_id == 0) {
+        this.mock = true;
+        this.reader = undefined;
+        this.writer = null;
+        this.info = .{
+            .temp_c = 30.0,
+            .fan_rpm = 1000.0,
+            .pump_rpm = 2000.0,
+        };
+    } else {
+        this.mock = false;
+        this.reader = win32.CreateFileW(device.path, win32.GENERIC_READ, win32.FILE_SHARE_READ | win32.FILE_SHARE_WRITE, null, win32.OPEN_EXISTING, 0, null);
+        this.writer = null;
+        this.info = undefined;
+    }
+
     return this;
 }
 
@@ -38,6 +54,8 @@ const FanOrPump = enum(u1) {
 };
 
 pub fn control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels: []const u8, interval: u32) void {
+    if (this.mock) return;
+
     if (this.writer == null) {
         this.writer = win32.CreateFileW(this.device.path, win32.GENERIC_WRITE, win32.FILE_SHARE_READ | win32.FILE_SHARE_WRITE, null, win32.OPEN_EXISTING, 0, null);
     }
@@ -63,6 +81,14 @@ pub fn control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels: []cons
 }
 
 pub fn update(this: *Kraken) callconv(.c) void {
+    if (this.mock) {
+        this.info.temp_c += 0.1;
+        if (this.info.temp_c > 80.0) this.info.temp_c = 30.0;
+        this.info.fan_rpm = 800.0 + this.info.temp_c * 20.0;
+        this.info.pump_rpm = 2000.0 + this.info.temp_c * 5.0;
+        return;
+    }
+
     var packet: [65]u8 = undefined;
     var num: u32 = undefined;
     if (win32.ReadFile(this.*.reader, @ptrCast(&packet), packet.len, &num, null) != 0) {
@@ -93,7 +119,9 @@ pub fn setFanCurve(this: *Kraken, curve: *const Curve) callconv(.c) void {
 }
 
 pub fn deinit(this: *Kraken) callconv(.c) void {
-    _ = win32.CloseHandle(this.reader);
+    if (!this.mock) {
+        _ = win32.CloseHandle(this.reader);
+    }
     if (this.writer != null) {
         _ = win32.CloseHandle(this.writer.?);
     }
@@ -117,6 +145,16 @@ pub fn getKrakens() callconv(.c) *List.ContainerType {
             }
             hid.deinit();
         }
+    }
+
+    if (app.is_debug and krakens.items.len == 0) {
+        const path = std.unicode.utf8ToUtf16LeAllocZ(app.allocator, "MOCK_PATH") catch unreachable;
+        defer app.allocator.free(path);
+        const serial = std.unicode.utf8ToUtf16LeAllocZ(app.allocator, "MOCK_SERIAL") catch unreachable;
+        defer app.allocator.free(serial);
+
+        const hid = HidDevice.init(0, 0, path, serial) catch unreachable;
+        List.append(krakens, init(hid));
     }
 
     return krakens;
