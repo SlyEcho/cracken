@@ -9,7 +9,7 @@ pub const Window = extern struct {
     const FnWindowCmd = *const fn (w: *Window, id: i32) callconv(.c) bool;
     const FnWindowColor = *const fn (w: *Window, hdc: w.HDC, ctrl: w.HWND) callconv(.c) ?w.HBRUSH;
 
-    const WindowClass = extern struct {
+    pub const WindowClass = extern struct {
         name: [*c]const u16,
         registered: bool,
         style: i32,

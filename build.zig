@@ -28,7 +28,6 @@ pub fn build(b: *std.Build) !void {
     const flags = .{ "-DUNICODE", "-D_UNICODE", "-DWIN32_LEAN_AND_MEAN" };
     const sources = .{
         "krakenwidget.c",
-        "mainwindow.c",
     };
 
     mod.addCSourceFiles(.{ .files = &sources, .flags = &flags });

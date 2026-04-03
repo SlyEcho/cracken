@@ -129,9 +129,28 @@ pub extern "comctl32" fn InitCommonControls() callconv(.winapi) void;
 pub extern "gdi32" fn GetTextExtentPoint32W(hdc: HDC, lpString: PWSTR, c: c_int, psize: *SIZE) callconv(.winapi) BOOL;
 pub extern "gdi32" fn GetTextMetricsW(hdc: HDC, lptm: *TEXTMETRICW) callconv(.winapi) BOOL;
 pub extern "gdi32" fn SelectObject(hdc: HDC, h: HGDIOBJ) callconv(.winapi) HGDIOBJ;
+pub extern "gdi32" fn SetBkMode(hdc: HDC, mode: c_int) callconv(.winapi) c_int;
+pub extern "gdi32" fn DeleteObject(ho: HGDIOBJ) callconv(.winapi) BOOL;
+pub extern "gdi32" fn CreateFontW(
+    cHeight: c_int,
+    cWidth: c_int,
+    cEscapement: c_int,
+    cOrientation: c_int,
+    cWeight: c_int,
+    bItalic: DWORD,
+    bUnderline: DWORD,
+    bStrikeOut: DWORD,
+    iCharSet: DWORD,
+    iOutPrecision: DWORD,
+    iClipPrecision: DWORD,
+    iQuality: DWORD,
+    iPitchAndFamily: DWORD,
+    pszFaceName: ?PCWSTR,
+) callconv(.winapi) HFONT;
 pub extern "user32" fn GetWindowTextW(hWnd: HWND, lpString: PWSTR, nMaxCount: c_int) callconv(.winapi) c_int;
 pub extern "user32" fn GetWindowTextLengthW(hWnd: HWND) callconv(.winapi) c_int;
 pub extern "user32" fn MoveWindow(hWnd: HWND, X: c_int, Y: c_int, nWidth: c_int, nHeight: c_int, bRepaint: BOOL) callconv(.winapi) BOOL;
+pub extern "user32" fn SetWindowTextW(hWnd: HWND, lpString: ?PCWSTR) callconv(.winapi) BOOL;
 pub extern "user32" fn SendMessageTimeoutW(
     hWnd: HWND,
     Msg: UINT,
@@ -193,6 +212,11 @@ pub fn getWindowFont(hwnd: HWND) !HFONT {
 pub extern "user32" fn GetMessageW(lpMsg: *MSG, hWnd: ?HWND, wMsgFilterMin: UINT, wMsgFilterMax: UINT) callconv(.winapi) BOOL;
 pub extern "user32" fn TranslateMessage(lpMsg: *const MSG) callconv(.winapi) BOOL;
 pub extern "user32" fn DispatchMessageW(lpMsg: *const MSG) callconv(.winapi) LRESULT;
+pub extern "user32" fn PostQuitMessage(nExitCode: c_int) callconv(.winapi) void;
+pub extern "user32" fn InvalidateRect(hWnd: HWND, lpRect: ?*const RECT, bErase: BOOL) callconv(.winapi) BOOL;
+pub extern "user32" fn UpdateWindow(hWnd: HWND) callconv(.winapi) BOOL;
+pub extern "user32" fn GetSysColorBrush(nIndex: c_int) callconv(.winapi) HBRUSH;
+pub extern "user32" fn SetTimer(hWnd: ?HWND, nIDEvent: usize, uElapse: UINT, lpTimerFunc: ?*const anyopaque) callconv(.winapi) usize;
 
 pub const GENERIC_READ = 0x80000000;
 pub const GENERIC_WRITE = 0x40000000;
@@ -218,6 +242,7 @@ pub const SWP_NOACTIVATE = 0x0010;
 
 pub const WM_CREATE = 0x0001;
 pub const WM_DESTROY = 0x0002;
+pub const WM_SETFONT = 0x0030;
 pub const WM_SIZE = 0x0005;
 pub const WM_PAINT = 0x000F;
 pub const WM_COMMAND = 0x0111;
@@ -228,6 +253,9 @@ pub const WM_DPICHANGED = 0x02E0;
 pub const WM_DPICHANGED_BEFOREPARENT = 0x02E2;
 pub const WM_CTLCOLORSTATIC = 0x0138;
 
+pub const WS_CHILD = 0x40000000;
+pub const WS_VISIBLE = 0x10000000;
+pub const WS_OVERLAPPEDWINDOW = 0x00CF0000;
 pub const WS_VSCROLL = 0x00200000;
 
 pub const SPI_GETWHEELSCROLLLINES = 0x0068;
@@ -250,6 +278,12 @@ pub const CS_VREDRAW = 0x0001;
 pub const CS_HREDRAW = 0x0002;
 
 pub const CW_USEDEFAULT = @as(c_int, @bitCast(@as(c_uint, 0x80000000)));
+
+pub const COLOR_WINDOW = 5;
+pub const DEFAULT_CHARSET = 1;
+pub const SS_CENTER = 0x00000001;
+pub const SS_CENTERIMAGE = 0x00000200;
+pub const TRANSPARENT = 1;
 
 pub const IDC_ARROW: [*:0]const u16 = @ptrFromInt(32512);
 

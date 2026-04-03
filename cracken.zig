@@ -4,6 +4,7 @@ const app = @import("app.zig");
 const kraken = @import("kraken.zig");
 const layout = @import("layout.zig");
 const window = @import("window.zig");
+const mainwindow = @import("mainwindow.zig");
 const xalloc = @import("xalloc.zig");
 
 const Window = opaque {};
@@ -14,6 +15,7 @@ pub fn main() !void {
     _ = kraken;
     _ = layout;
     _ = window;
+    _ = mainwindow;
     _ = xalloc;
 
     app.instance = @ptrCast(win32.GetModuleHandleW(null));
