@@ -1,7 +1,7 @@
 const std = @import("std");
 const win32 = @import("win32.zig");
 
-const LayoutCell = extern struct {
+pub const LayoutCell = extern struct {
     text: ?win32.PWSTR,
     font: ?win32.HFONT,
     height: i32,

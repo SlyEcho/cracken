@@ -293,20 +293,12 @@ pub const Window = extern struct {
 
         const parent_hwnd = if (parent) |p| p.hwnd else null;
 
-        const hwnd = w.CreateWindowExW(
-            0,
-            self.class.name,
-            title,
-            @bitCast(self.class.style),
-            w.CW_USEDEFAULT,
-            w.CW_USEDEFAULT,
-            0,
-            0,
-            parent_hwnd,
-            null,
-            app.instance,
-            self,
-        );
+        const hwnd = w.createWindow(self.class.name, title, .{
+            .style = @bitCast(self.class.style),
+            .parent = parent_hwnd,
+            .instance = app.instance,
+            .param = self,
+        });
 
         var r: w.RECT = undefined;
         _ = w.GetClientRect(hwnd, &r);

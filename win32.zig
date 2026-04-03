@@ -130,6 +130,7 @@ pub extern "gdi32" fn GetTextExtentPoint32W(hdc: HDC, lpString: PWSTR, c: c_int,
 pub extern "gdi32" fn GetTextMetricsW(hdc: HDC, lptm: *TEXTMETRICW) callconv(.winapi) BOOL;
 pub extern "gdi32" fn SelectObject(hdc: HDC, h: HGDIOBJ) callconv(.winapi) HGDIOBJ;
 pub extern "gdi32" fn SetBkMode(hdc: HDC, mode: c_int) callconv(.winapi) c_int;
+pub extern "gdi32" fn SetTextColor(hdc: HDC, color: u32) callconv(.winapi) u32;
 pub extern "gdi32" fn DeleteObject(ho: HGDIOBJ) callconv(.winapi) BOOL;
 pub extern "gdi32" fn CreateFontW(
     cHeight: c_int,
@@ -150,6 +151,8 @@ pub extern "gdi32" fn CreateFontW(
 pub extern "user32" fn GetWindowTextW(hWnd: HWND, lpString: PWSTR, nMaxCount: c_int) callconv(.winapi) c_int;
 pub extern "user32" fn GetWindowTextLengthW(hWnd: HWND) callconv(.winapi) c_int;
 pub extern "user32" fn MoveWindow(hWnd: HWND, X: c_int, Y: c_int, nWidth: c_int, nHeight: c_int, bRepaint: BOOL) callconv(.winapi) BOOL;
+pub extern "user32" fn GetDC(hWnd: ?HWND) callconv(.winapi) ?HDC;
+pub extern "user32" fn ReleaseDC(hWnd: ?HWND, hDC: ?HDC) callconv(.winapi) c_int;
 pub extern "user32" fn SetWindowTextW(hWnd: HWND, lpString: ?PCWSTR) callconv(.winapi) BOOL;
 pub extern "user32" fn SendMessageTimeoutW(
     hWnd: HWND,
@@ -180,6 +183,7 @@ pub extern "user32" fn DefWindowProcW(hWnd: HWND, Msg: UINT, wParam: WPARAM, lPa
 pub extern "user32" fn SetWindowLongPtrW(hWnd: HWND, nIndex: c_int, dwNewLong: LONG_PTR) callconv(.winapi) LONG_PTR;
 pub extern "user32" fn GetWindowLongPtrW(hWnd: HWND, nIndex: c_int) callconv(.winapi) LONG_PTR;
 pub extern "user32" fn LoadCursorW(hInstance: ?HINSTANCE, lpCursorName: ?PCWSTR) callconv(.winapi) HCURSOR;
+pub extern "user32" fn SetCursor(hCursor: ?HCURSOR) callconv(.winapi) ?HCURSOR;
 pub extern "user32" fn RegisterClassW(lpWndClass: *const WNDCLASSW) callconv(.winapi) ATOM;
 pub extern "user32" fn CreateWindowExW(
     dwExStyle: DWORD,
@@ -253,6 +257,7 @@ pub const WM_DPICHANGED = 0x02E0;
 pub const WM_DPICHANGED_BEFOREPARENT = 0x02E2;
 pub const WM_CTLCOLORSTATIC = 0x0138;
 
+pub const WS_OVERLAPPED = 0x00000000;
 pub const WS_CHILD = 0x40000000;
 pub const WS_VISIBLE = 0x10000000;
 pub const WS_OVERLAPPEDWINDOW = 0x00CF0000;
@@ -271,6 +276,9 @@ pub const SB_BOTTOM = 7;
 
 pub const BN_CLICKED = 0;
 pub const CBN_SELCHANGE = 1;
+pub const CB_ADDSTRING = 0x0143;
+pub const CB_GETCURSEL = 0x0147;
+pub const CB_ERR: i32 = -1;
 
 pub const GWLP_USERDATA = -21;
 
@@ -281,11 +289,17 @@ pub const CW_USEDEFAULT = @as(c_int, @bitCast(@as(c_uint, 0x80000000)));
 
 pub const COLOR_WINDOW = 5;
 pub const DEFAULT_CHARSET = 1;
+pub const FW_BOLD = 700;
+pub const CBS_DROPDOWNLIST = 0x0003;
+pub const CBS_HASSTRINGS = 0x0200;
+pub const SS_LEFT = 0x00000000;
 pub const SS_CENTER = 0x00000001;
+pub const SS_RIGHT = 0x00000002;
 pub const SS_CENTERIMAGE = 0x00000200;
 pub const TRANSPARENT = 1;
 
 pub const IDC_ARROW: [*:0]const u16 = @ptrFromInt(32512);
+pub const IDC_APPSTARTING: [*:0]const u16 = @ptrFromInt(32650);
 
 pub const CreateFileW = win32.kernel32.CreateFileW;
 pub const ReadFile = win32.kernel32.ReadFile;
@@ -358,6 +372,70 @@ pub extern "user32" fn ScrollWindow(
     lpClipRect: ?*const RECT,
 ) callconv(.winapi) BOOL;
 
+pub const FontOptions = struct {
+    width: i32 = 0,
+    escapement: i32 = 0,
+    orientation: i32 = 0,
+    weight: i32 = 0,
+    italic: bool = false,
+    underline: bool = false,
+    strike_out: bool = false,
+    char_set: DWORD = DEFAULT_CHARSET,
+    out_precision: DWORD = 0,
+    clip_precision: DWORD = 0,
+    quality: DWORD = 0,
+    pitch_and_family: DWORD = 0,
+};
+
+pub fn createFont(height: i32, face_name: ?PCWSTR, options: FontOptions) HFONT {
+    return CreateFontW(
+        height,
+        options.width,
+        options.escapement,
+        options.orientation,
+        options.weight,
+        @intFromBool(options.italic),
+        @intFromBool(options.underline),
+        @intFromBool(options.strike_out),
+        options.char_set,
+        options.out_precision,
+        options.clip_precision,
+        options.quality,
+        options.pitch_and_family,
+        face_name,
+    );
+}
+
+pub const CreateWindowOptions = struct {
+    ex_style: DWORD = 0,
+    style: DWORD,
+    x: c_int = CW_USEDEFAULT,
+    y: c_int = CW_USEDEFAULT,
+    width: c_int = 0,
+    height: c_int = 0,
+    parent: ?HWND = null,
+    menu: ?HMENU = null,
+    instance: ?HINSTANCE = null,
+    param: ?*anyopaque = null,
+};
+
+pub fn createWindow(class_name: PCWSTR, title: ?PCWSTR, options: CreateWindowOptions) HWND {
+    return CreateWindowExW(
+        options.ex_style,
+        class_name,
+        title,
+        options.style,
+        options.x,
+        options.y,
+        options.width,
+        options.height,
+        options.parent,
+        options.menu,
+        options.instance,
+        options.param,
+    );
+}
+
 pub fn LOWORD(l: anytype) u16 {
     return @truncate(@as(usize, @bitCast(l)) & 0xffff);
 }
@@ -372,4 +450,8 @@ pub fn GET_WHEEL_DELTA_WPARAM(wParam: WPARAM) i16 {
 
 pub fn MAKELONG(a: u16, b: u16) u32 {
     return @as(u32, a) | (@as(u32, b) << 16);
+}
+
+pub fn RGB(r: u8, g: u8, b: u8) u32 {
+    return @as(u32, r) | (@as(u32, g) << 8) | (@as(u32, b) << 16);
 }

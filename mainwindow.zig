@@ -72,21 +72,10 @@ fn loadAssets(self: *PrivateMainWindow, reload: bool) void {
         }
 
         if (self.font == null) {
-            self.font = w.CreateFontW(
+            self.font = w.createFont(
                 Window_scale(&self.public.base, 16),
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                w.DEFAULT_CHARSET,
-                0,
-                0,
-                0,
-                0,
                 std.unicode.utf8ToUtf16LeStringLiteral("Segoe UI"),
+                .{},
             );
         }
 
@@ -152,19 +141,18 @@ fn created(base: *window.Window) callconv(.c) void {
     }
 
     if (self.widget_count == 0) {
-        self.no_devices = w.CreateWindowExW(
-            0,
+        self.no_devices = w.createWindow(
             std.unicode.utf8ToUtf16LeStringLiteral("Static"),
             std.unicode.utf8ToUtf16LeStringLiteral("No devices found"),
-            w.SS_CENTER | w.SS_CENTERIMAGE | w.WS_CHILD | w.WS_VISIBLE,
-            0,
-            0,
-            0,
-            0,
-            self.public.base.hwnd,
-            null,
-            app.instance,
-            null,
+            .{
+                .style = w.SS_CENTER | w.SS_CENTERIMAGE | w.WS_CHILD | w.WS_VISIBLE,
+                .x = 0,
+                .y = 0,
+                .width = 0,
+                .height = 0,
+                .parent = self.public.base.hwnd,
+                .instance = app.instance,
+            },
         );
     }
 
