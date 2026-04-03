@@ -180,6 +180,8 @@ pub extern "user32" fn GetDpiForSystem() callconv(.winapi) UINT;
 pub extern "user32" fn SystemParametersInfoW(uiAction: UINT, uiParam: UINT, pvParam: ?*anyopaque, fWinIni: UINT) callconv(.winapi) BOOL;
 pub extern "user32" fn SendMessageW(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM) callconv(.winapi) LRESULT;
 pub extern "user32" fn DefWindowProcW(hWnd: HWND, Msg: UINT, wParam: WPARAM, lParam: LPARAM) callconv(.winapi) LRESULT;
+pub extern "user32" fn SetWindowLongW(hWnd: HWND, nIndex: c_int, dwNewLong: LONG) callconv(.winapi) LONG;
+pub extern "user32" fn GetWindowLongW(hWnd: HWND, nIndex: c_int) callconv(.winapi) LONG;
 pub extern "user32" fn SetWindowLongPtrW(hWnd: HWND, nIndex: c_int, dwNewLong: LONG_PTR) callconv(.winapi) LONG_PTR;
 pub extern "user32" fn GetWindowLongPtrW(hWnd: HWND, nIndex: c_int) callconv(.winapi) LONG_PTR;
 pub extern "user32" fn LoadCursorW(hInstance: ?HINSTANCE, lpCursorName: ?PCWSTR) callconv(.winapi) HCURSOR;
@@ -200,6 +202,20 @@ pub extern "user32" fn CreateWindowExW(
     lpParam: ?*anyopaque,
 ) callconv(.winapi) HWND;
 pub extern "user32" fn GetClientRect(hWnd: HWND, lpRect: *RECT) callconv(.winapi) BOOL;
+
+pub fn setWindowLongPtr(hwnd: HWND, nIndex: c_int, value: LONG_PTR) LONG_PTR {
+    if (@sizeOf(usize) == 4) {
+        return @as(LONG_PTR, @intCast(SetWindowLongW(hwnd, nIndex, @as(LONG, @intCast(value)))));
+    }
+    return SetWindowLongPtrW(hwnd, nIndex, value);
+}
+
+pub fn getWindowLongPtr(hwnd: HWND, nIndex: c_int) LONG_PTR {
+    if (@sizeOf(usize) == 4) {
+        return @as(LONG_PTR, @intCast(GetWindowLongW(hwnd, nIndex)));
+    }
+    return GetWindowLongPtrW(hwnd, nIndex);
+}
 
 pub fn getWindowFont(hwnd: HWND) !HFONT {
     var out: DWORD_PTR = undefined;

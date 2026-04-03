@@ -240,10 +240,10 @@ pub const Window = extern struct {
             self = @ptrCast(@alignCast(pCreate.lpCreateParams));
             if (self) |s| {
                 s.hwnd = hwnd;
-                _ = w.SetWindowLongPtrW(hwnd, w.GWLP_USERDATA, @bitCast(@intFromPtr(s)));
+                _ = w.setWindowLongPtr(hwnd, w.GWLP_USERDATA, @bitCast(@intFromPtr(s)));
             }
         } else {
-            const ptr = w.GetWindowLongPtrW(hwnd, w.GWLP_USERDATA);
+            const ptr = w.getWindowLongPtr(hwnd, w.GWLP_USERDATA);
             if (ptr != 0) {
                 self = @ptrFromInt(@as(usize, @bitCast(ptr)));
             }
