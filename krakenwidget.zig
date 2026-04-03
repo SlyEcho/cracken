@@ -11,9 +11,6 @@ const DeviceInfo = kraken_mod.DeviceInfo;
 const Curve = curves.Curve;
 const LayoutCell = layout.LayoutCell;
 
-extern fn Window_init(wnd: *window.Window, parent: ?*window.Window, title: [*:0]const u16) callconv(.c) void;
-extern fn Window_scale(wnd: *window.Window, dimension: i32) callconv(.c) i32;
-
 pub const KrakenWidget = extern struct {
     base: window.Window,
     kraken: *Kraken,
@@ -65,7 +62,7 @@ fn formatLabel(comptime fmt: []const u8, args: anytype) [:0]u16 {
     return std.unicode.utf8ToUtf16LeAllocZ(app.allocator, utf8) catch unreachable;
 }
 
-fn updateExport(this: *KrakenWidget) callconv(.c) void {
+pub fn update(this: *KrakenWidget) void {
     const info: *const DeviceInfo = kraken_mod.getInfo(this.kraken) orelse return;
 
     const temp = formatLabel("{d:.1} °C", .{info.temp_c});
@@ -84,8 +81,8 @@ fn updateExport(this: *KrakenWidget) callconv(.c) void {
 fn position(self: *PrivateKrakenWidget) void {
     if (self.pump == null or self.fan == null) return;
 
-    const m = Window_scale(&self.public.base, 5);
-    const h = Window_scale(&self.public.base, 20);
+    const m = self.public.base.scale(5);
+    const h = self.public.base.scale(20);
 
     var c_lab_device = LayoutCell{ .text = null, .font = null, .height = 0, .width = 0, .ascender = 0, .x = 0, .y = 0, .control = self.labels.device };
     var c_lab_temp = LayoutCell{ .text = null, .font = null, .height = 0, .width = 0, .ascender = 0, .x = 0, .y = 0, .control = self.labels.temp };
@@ -107,7 +104,7 @@ fn position(self: *PrivateKrakenWidget) void {
     const hdc = w.GetDC(self.public.base.hwnd) orelse return;
     defer _ = w.ReleaseDC(self.public.base.hwnd, hdc);
 
-    layout.layout(hdc, 0, 0, 4, 2, &cells, Window_scale(&self.public.base, 5));
+    layout.layout(hdc, 0, 0, 4, 2, &cells, self.public.base.scale(5));
 
     const pump_y = c_val_pump.y + c_val_pump.ascender;
     const fan_y = c_val_fan.y + c_val_fan.ascender;
@@ -129,7 +126,7 @@ fn loadAssets(self: *PrivateKrakenWidget, reload: bool) void {
 
     if (self.font == null) {
         self.font = w.createFont(
-            Window_scale(&self.public.base, 16),
+            self.public.base.scale(16),
             std.unicode.utf8ToUtf16LeStringLiteral("Segoe UI"),
             .{},
         );
@@ -137,7 +134,7 @@ fn loadAssets(self: *PrivateKrakenWidget, reload: bool) void {
 
     if (self.bold_font == null) {
         self.bold_font = w.createFont(
-            Window_scale(&self.public.base, 16),
+            self.public.base.scale(16),
             std.unicode.utf8ToUtf16LeStringLiteral("Segoe UI"),
             .{ .weight = w.FW_BOLD },
         );
@@ -145,7 +142,7 @@ fn loadAssets(self: *PrivateKrakenWidget, reload: bool) void {
 
     if (self.big_font == null) {
         self.big_font = w.createFont(
-            Window_scale(&self.public.base, 36),
+            self.public.base.scale(36),
             std.unicode.utf8ToUtf16LeStringLiteral("Arial"),
             .{ .weight = w.FW_BOLD },
         );
@@ -256,7 +253,7 @@ fn makeStatic(parent: w.HWND, text: [*:0]const u16, style: u32) ?w.HWND {
     );
 }
 
-fn createExport(parent: *window.Window, kraken: *Kraken) callconv(.c) *KrakenWidget {
+pub fn create(parent: *window.Window, kraken: *Kraken) *KrakenWidget {
     const self = app.allocator.create(PrivateKrakenWidget) catch unreachable;
     self.* = .{
         .public = .{ .base = undefined, .kraken = kraken },
@@ -270,7 +267,7 @@ fn createExport(parent: *window.Window, kraken: *Kraken) callconv(.c) *KrakenWid
     };
 
     self.public.base.class = &class;
-    Window_init(&self.public.base, parent, std.unicode.utf8ToUtf16LeStringLiteral(""));
+    self.public.base.init(parent, std.unicode.utf8ToUtf16LeStringLiteral(""));
 
     self.pump = w.createWindow(
         std.unicode.utf8ToUtf16LeStringLiteral("ComboBox"),
@@ -328,7 +325,3 @@ fn createExport(parent: *window.Window, kraken: *Kraken) callconv(.c) *KrakenWid
     return &self.public;
 }
 
-comptime {
-    @export(&updateExport, .{ .name = "KrakenWidget_update", .linkage = .strong });
-    @export(&createExport, .{ .name = "KrakenWidget_create", .linkage = .strong });
-}

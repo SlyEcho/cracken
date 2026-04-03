@@ -35,19 +35,19 @@ pub const Window = extern struct {
     dpi: i32,
     content_height: i32,
 
-    fn scale(self: *Self, s: i32) callconv(.c) i32 {
+    pub fn scale(self: *Self, s: i32) i32 {
         return @divFloor(s * self.dpi, 96);
     }
 
-    fn unscale(self: *Self, s: i32) callconv(.c) i32 {
+    pub fn unscale(self: *Self, s: i32) i32 {
         return @divFloor(s * 96, self.dpi);
     }
 
-    fn show(self: *Self) callconv(.c) void {
+    pub fn show(self: *Self) void {
         _ = w.ShowWindow(self.hwnd, w.SW_SHOWDEFAULT);
     }
 
-    fn rescale(self: *Self, x: i32, y: i32, width: i32, height: i32) callconv(.c) void {
+    pub fn rescale(self: *Self, x: i32, y: i32, width: i32, height: i32) void {
         var size: w.RECT = undefined;
         if (w.GetWindowRect(self.hwnd, &size) == w.FALSE) return;
 
@@ -65,7 +65,7 @@ pub const Window = extern struct {
         );
     }
 
-    fn update_scroll(self: *Self) callconv(.c) void {
+    pub fn updateScroll(self: *Self) void {
         var si: w.SCROLLINFO = .{ .fMask = w.SIF_POS };
 
         _ = w.GetScrollInfo(self.hwnd, w.SB_VERT, &si);
@@ -127,7 +127,7 @@ pub const Window = extern struct {
 
         switch (msg) {
             w.WM_DPICHANGED, w.WM_SIZE => {
-                self.update_scroll();
+                self.updateScroll();
             },
             w.WM_MOUSEWHEEL => {
                 var scrollLines: i32 = 3;
@@ -308,11 +308,3 @@ pub const Window = extern struct {
     }
 };
 
-comptime {
-    @export(&Window.init, .{ .name = "Window_init", .linkage = .strong });
-    @export(&Window.show, .{ .name = "Window_show", .linkage = .strong });
-    @export(&Window.scale, .{ .name = "Window_scale", .linkage = .strong });
-    @export(&Window.rescale, .{ .name = "Window_rescale", .linkage = .strong });
-    @export(&Window.unscale, .{ .name = "Window_unscale", .linkage = .strong });
-    @export(&Window.update_scroll, .{ .name = "Window_update_scroll", .linkage = .strong });
-}

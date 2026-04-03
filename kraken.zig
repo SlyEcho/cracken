@@ -86,7 +86,7 @@ pub fn control(this: *Kraken, isSave: bool, fanOrpump: FanOrPump, levels: []cons
     }
 }
 
-pub fn update(this: *Kraken) callconv(.c) void {
+pub fn update(this: *Kraken) void {
     if (this.mock) {
         this.info.temp_c += 0.1;
         if (this.info.temp_c > 80.0) this.info.temp_c = 30.0;
@@ -104,27 +104,27 @@ pub fn update(this: *Kraken) callconv(.c) void {
     }
 }
 
-pub fn getIdent(this: *const Kraken) callconv(.c) [*:0]const u16 {
+pub fn getIdent(this: *const Kraken) [*:0]const u16 {
     return @ptrCast(&this.ident[0]);
 }
 
-pub fn getInfo(this: *const Kraken) callconv(.c) ?*const DeviceInfo {
+pub fn getInfo(this: *const Kraken) ?*const DeviceInfo {
     return &this.info;
 }
 
 const Curve = curves.Curve;
 
-pub fn setPumpCurve(this: *Kraken, curve: *const Curve) callconv(.c) void {
+pub fn setPumpCurve(this: *Kraken, curve: *const Curve) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
     control(this, curve.length > 1, .PUMP, curve.toSlice(), interval);
 }
 
-pub fn setFanCurve(this: *Kraken, curve: *const Curve) callconv(.c) void {
+pub fn setFanCurve(this: *Kraken, curve: *const Curve) void {
     const interval = if (curve.length == 1) 0 else @divTrunc(100, curve.length - 1);
     control(this, curve.length > 1, .FAN, curve.toSlice(), interval);
 }
 
-pub fn deinit(this: *Kraken) callconv(.c) void {
+pub fn deinit(this: *Kraken) void {
     if (!this.mock) {
         _ = win32.CloseHandle(this.reader);
     }
@@ -136,7 +136,7 @@ pub fn deinit(this: *Kraken) callconv(.c) void {
     app.allocator.destroy(this);
 }
 
-pub fn getKrakens() callconv(.c) *List.ContainerType {
+pub fn getKrakens() *List.ContainerType {
     var denu = DeviceEnumerator.init();
     defer denu.deinit();
 
@@ -166,12 +166,3 @@ pub fn getKrakens() callconv(.c) *List.ContainerType {
     return krakens;
 }
 
-comptime {
-    @export(&update, .{ .name = "Kraken_update", .linkage = .strong });
-    @export(&getIdent, .{ .name = "Kraken_get_ident", .linkage = .strong });
-    @export(&getInfo, .{ .name = "Kraken_get_info", .linkage = .strong });
-    @export(&setPumpCurve, .{ .name = "Kraken_set_pump_curve", .linkage = .strong });
-    @export(&setFanCurve, .{ .name = "Kraken_set_fan_curve", .linkage = .strong });
-    @export(&deinit, .{ .name = "Kraken_delete", .linkage = .strong });
-    @export(&getKrakens, .{ .name = "Kraken_get_krakens", .linkage = .strong });
-}

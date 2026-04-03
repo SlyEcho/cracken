@@ -1,16 +1,12 @@
 const app = @import("app.zig");
 
-fn xmalloc(size: usize) callconv(.c) [*]align(8) u8 {
+pub fn xmalloc(size: usize) [*]align(8) u8 {
     var slice = app.allocator.alignedAlloc(u8, .@"8", size) catch unreachable;
     @memset(slice, 0);
     return @ptrCast(&slice[0]);
 }
 
-fn xfree(p: [*]u8, size: usize) callconv(.c) void {
+pub fn xfree(p: [*]u8, size: usize) void {
     app.allocator.free(p[0..size]);
 }
 
-comptime {
-    @export(&xmalloc, .{ .name = "xmalloc", .linkage = .strong });
-    @export(&xfree, .{ .name = "xfree", .linkage = .strong });
-}

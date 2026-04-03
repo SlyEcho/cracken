@@ -20,7 +20,7 @@ pub fn layout(
     ncol: u32,
     cells: [*]*LayoutCell,
     margin: i32,
-) callconv(.c) void {
+) void {
     var buffer: [4096]u8 = undefined;
     var fba = std.heap.FixedBufferAllocator.init(&buffer);
     const allocator = fba.allocator();
@@ -125,6 +125,3 @@ pub fn layout(
     //std.debug.print("Layout() done\n", .{});
 }
 
-comptime {
-    @export(&layout, .{ .name = "Layout", .linkage = .strong });
-}

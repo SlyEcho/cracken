@@ -52,7 +52,3 @@ const presets = struct {
 pub const fan_presets = presets.fan;
 pub const pump_presets = presets.pump;
 
-comptime {
-    @export(&presets.fan, .{ .name = "Curve_fan_presets", .linkage = .strong });
-    @export(&presets.pump, .{ .name = "Curve_pump_presets", .linkage = .strong });
-}

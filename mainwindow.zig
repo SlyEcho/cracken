@@ -1,25 +1,13 @@
 const std = @import("std");
 const app = @import("app.zig");
+const kraken = @import("kraken.zig");
+const krakenwidget = @import("krakenwidget.zig");
 const List = @import("list.zig");
 const w = @import("win32.zig");
 const window = @import("window.zig");
 
-const Kraken = opaque {};
-extern fn Kraken_update(k: *Kraken) callconv(.c) void;
-extern fn Kraken_get_krakens() callconv(.c) *List.ContainerType;
-
-const KrakenWidget = extern struct {
-    base: window.Window,
-    kraken: ?*anyopaque,
-};
-extern fn KrakenWidget_create(parent: *window.Window, kraken: *Kraken) callconv(.c) *KrakenWidget;
-extern fn KrakenWidget_update(kw: *KrakenWidget) callconv(.c) void;
-
-extern fn Window_init(wnd: *window.Window, parent: ?*window.Window, title: [*:0]const u16) callconv(.c) void;
-extern fn Window_rescale(wnd: *window.Window, x: i32, y: i32, width: i32, height: i32) callconv(.c) void;
-extern fn Window_scale(wnd: *window.Window, dimension: i32) callconv(.c) i32;
-extern fn Window_unscale(wnd: *window.Window, dimension: i32) callconv(.c) i32;
-extern fn Window_update_scroll(wnd: *window.Window) callconv(.c) void;
+const Kraken = kraken;
+const KrakenWidget = krakenwidget.KrakenWidget;
 
 pub const MainWindow = extern struct {
     base: window.Window,
@@ -50,12 +38,12 @@ fn update(self: *PrivateMainWindow) void {
     var i: usize = 0;
     while (i < List.length(self.krakens)) : (i += 1) {
         const k: *Kraken = @ptrCast(@alignCast(List.get(self.krakens, i).?));
-        Kraken_update(k);
+        k.update();
     }
 
     i = 0;
     while (i < self.widget_count) : (i += 1) {
-        KrakenWidget_update(self.widgets.?[i]);
+        krakenwidget.update(self.widgets.?[i]);
     }
 
     _ = w.InvalidateRect(self.public.base.hwnd, null, w.TRUE);
@@ -73,7 +61,7 @@ fn loadAssets(self: *PrivateMainWindow, reload: bool) void {
 
         if (self.font == null) {
             self.font = w.createFont(
-                Window_scale(&self.public.base, 16),
+                self.public.base.scale(16),
                 std.unicode.utf8ToUtf16LeStringLiteral("Segoe UI"),
                 .{},
             );
@@ -97,14 +85,13 @@ fn resize(base: *window.Window) callconv(.c) void {
     var i: usize = 0;
     while (i < self.widget_count) : (i += 1) {
         const y: i32 = @intCast(10 + i * 150);
-        Window_rescale(
-            &self.widgets.?[i].base,
+        self.widgets.?[i].base.rescale(
             10,
             y,
-            Window_unscale(&self.public.base, self.public.base.width) - 20,
+            self.public.base.unscale(self.public.base.width) - 20,
             140,
         );
-        self.public.base.content_height += Window_scale(&self.public.base, 150);
+        self.public.base.content_height += self.public.base.scale(150);
     }
 
     if (self.no_devices) |no_devices| {
@@ -121,7 +108,7 @@ fn dpi(base: *window.Window) callconv(.c) void {
 fn created(base: *window.Window) callconv(.c) void {
     const self = selfFromBase(base);
 
-    self.krakens = Kraken_get_krakens();
+    self.krakens = kraken.getKrakens();
     update(self);
 
     _ = w.SetTimer(self.public.base.hwnd, ID_UPDATE, 2000, null);
@@ -134,9 +121,9 @@ fn created(base: *window.Window) callconv(.c) void {
         var i: usize = 0;
         while (i < self.widget_count) : (i += 1) {
             const k: *Kraken = @ptrCast(@alignCast(List.get(self.krakens, i).?));
-            const kw = KrakenWidget_create(&self.public.base, k);
+            const kw = krakenwidget.create(&self.public.base, k);
             self.widgets.?[i] = kw;
-            KrakenWidget_update(kw);
+            krakenwidget.update(kw);
         }
     }
 
@@ -157,7 +144,7 @@ fn created(base: *window.Window) callconv(.c) void {
     }
 
     resize(base);
-    Window_update_scroll(&self.public.base);
+    self.public.base.updateScroll();
 }
 
 fn command(base: *window.Window, id: i32) callconv(.c) bool {
@@ -194,7 +181,7 @@ var crackenClass = window.Window.WindowClass{
     .timer = command,
 };
 
-fn createExport() callconv(.c) *window.Window {
+pub fn create() *window.Window {
     const self = app.allocator.create(PrivateMainWindow) catch unreachable;
     self.* = .{
         .public = .{ .base = undefined },
@@ -210,11 +197,8 @@ fn createExport() callconv(.c) *window.Window {
     }
 
     self.public.base.class = &crackenClass;
-    Window_init(&self.public.base, null, std.unicode.utf8ToUtf16LeStringLiteral("Cracken"));
-    Window_rescale(&self.public.base, -1, -1, 300, 200);
+    self.public.base.init(null, std.unicode.utf8ToUtf16LeStringLiteral("Cracken"));
+    self.public.base.rescale(-1, -1, 300, 200);
     return &self.public.base;
 }
 
-comptime {
-    @export(&createExport, .{ .name = "MainWindow_create", .linkage = .strong });
-}
